@@ -151,11 +151,40 @@ if prompt_usuario := st.chat_input("Ex: Quero descartar restos de obra e moro na
                     bairro_detectado = dados_extraidos.get("bairro")
                     material_detectado = dados_extraidos.get("material")
                     
+                    # # Para a query do chat, buscamos ecopontos pelo bairro detectado pela IA
+                    # if bairro_detectado:
+                    #     # Reutiliza uma query simples de correspondência por bairro
+                    #     query_chat = "SELECT ecoponto, endereco, horario, zona, materiais_aceitos FROM vw_materiais_por_ecoponto WHERE bairro LIKE %s OR ecoponto LIKE %s"
+                    #     ecopontos = executar_query(query_chat, (bairro_detectado,))
+                        
+                    #     if ecopontos:
+                    #         resposta_final = f"Entendi que você quer descartar **{material_detectado or 'seus materiais'}** e está na região de **{bairro_detectado}**.<br><br>"
+                    #         resposta_final += "Aqui estão os pontos de coleta que encontrei para você:<br><br>"
+                    #         for eco in ecopontos:
+                    #             resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** ({eco['zona']})<br>"
+                    #             resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
+                    #             resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
+                    #             resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
+                    #     else:
+                    #         resposta_final = f"Identifiquei que você está em **{bairro_detectado}**, mas não localizei nenhum ecoponto correspondente cadastrado no banco da AWS."
+                    # else:
+                    #     resposta_final = "Consegui entender o que você quer descartar, mas não captei o seu **bairro**. Pode digitar a sua região ou subprefeitura?"
+                    
+                    # st.markdown(resposta_final, unsafe_allow_html=True)
+                    # st.session_state.messages.append({"role": "assistant", "content": resposta_final})
+                    # st.rerun()
+                    
+
                     # Para a query do chat, buscamos ecopontos pelo bairro detectado pela IA
                     if bairro_detectado:
-                        # Reutiliza uma query simples de correspondência por bairro
-                        query_chat = "SELECT ecoponto, endereco, horario, zona, materiais_aceitos FROM vw_materiais_por_ecoponto WHERE bairro = %s"
-                        ecopontos = executar_query(query_chat, (bairro_detectado,))
+                        # Criamos o termo com % para permitir buscas parciais (ex: "Badra" encontra "Viaduto Eng. Alberto Badra")
+                        termo_busca = f"%{bairro_detectado}%"
+                        
+                        # Query atualizada para buscar tanto na coluna bairro quanto na coluna ecoponto
+                        query_chat = "SELECT ecoponto, endereco, horario, zona, materiais_aceitos FROM vw_materiais_por_ecoponto WHERE bairro LIKE %s OR ecoponto LIKE %s"
+                        
+                        # Passamos o termo_busca duas vezes na tupla para preencher os dois %s da query
+                        ecopontos = executar_query(query_chat, (termo_busca, termo_busca))
                         
                         if ecopontos:
                             resposta_final = f"Entendi que você quer descartar **{material_detectado or 'seus materiais'}** e está na região de **{bairro_detectado}**.<br><br>"
@@ -169,11 +198,12 @@ if prompt_usuario := st.chat_input("Ex: Quero descartar restos de obra e moro na
                             resposta_final = f"Identifiquei que você está em **{bairro_detectado}**, mas não localizei nenhum ecoponto correspondente cadastrado no banco da AWS."
                     else:
                         resposta_final = "Consegui entender o que você quer descartar, mas não captei o seu **bairro**. Pode digitar a sua região ou subprefeitura?"
-                    
+
                     st.markdown(resposta_final, unsafe_allow_html=True)
                     st.session_state.messages.append({"role": "assistant", "content": resposta_final})
                     st.rerun()
-                    
+
+
                 except Exception as error_ia:
                     st.error(f"Erro no processamento da Inteligência Artificial: {error_ia}")
 
