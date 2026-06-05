@@ -35,44 +35,44 @@ client_gemini = genai.Client(api_key=GEMINI_API_KEY)
 client_groq = Groq(api_key=GROQ_API_KEY)
 
 # ============================================================
-#  [IA] FUNÇÃO COM FALLBACK AUTOMÁTICO GEMINI → OPENAI
+#  [IA] FUNÇÃO COM FALLBACK AUTOMÁTICO GEMINI → GROQ
 # ============================================================
 def chamar_ia_com_fallback(prompt_usuario: str, prompt_sistema: str) -> dict:
     """
-    Tenta extrair material e bairro via Gemini.
-    Se falhar por qualquer motivo (cota, erro, etc.), usa GPT-4o-mini como fallback.
+    Tenta extrair material e bairro via Groq.
+    Se falhar por qualquer motivo (cota, erro, etc.), usa Groq como fallback.
     Retorna sempre um dict com chaves 'material' e 'bairro'.
     """
-    # ── Tentativa 1: Gemini ──
+    # ── Tentativa 1: Groq ──
     try:
-        config = types.GenerateContentConfig(
-            system_instruction=prompt_sistema,
-            response_mime_type="application/json",
-            temperature=0.1
+        response_groq = client_groq.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            temperature=0.1,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": prompt_sistema},
+                {"role": "user",   "content": prompt_usuario}
+            ]
         )
-        response = client_gemini.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt_usuario,
-            config=config
-        )
-        dados = json.loads(response.text)
-        dados["_modelo_usado"] = "Gemini 2.5 Flash"
+        dados = json.loads(response_groq.choices[0].message.content)
+        dados["_modelo_usado"] = "Llama 3.1 8B via Groq (fallback)"
         return dados
 
     except Exception as err_gemini:
-        # ── Fallback: OpenAI GPT-4o-mini ──
+        # ── Fallback: Gemini ──
         try:
-            response_openai = client_groq.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                temperature=0.1,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": prompt_sistema},
-                    {"role": "user",   "content": prompt_usuario}
-                ]
+            config = types.GenerateContentConfig(
+                system_instruction=prompt_sistema,
+                response_mime_type="application/json",
+                temperature=0.1
             )
-            dados = json.loads(response_openai.choices[0].message.content)
-            dados["_modelo_usado"] = "Llama 3.1 8B via Groq (fallback)"
+            response = client_gemini.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt_usuario,
+                config=config
+            )
+            dados = json.loads(response.text)
+            dados["_modelo_usado"] = "Gemini 2.5 Flash"
             return dados
 
         except Exception as err_openai:
@@ -229,7 +229,7 @@ with st.form(key="chat_form_inline", clear_on_submit=True):
         placeholder="Ex: Quero descartar restos de obra e moro na Penha",
         label_visibility="collapsed"
     )
-    botao_enviar = st.form_submit_button(label="✉️  Enviar mensagem", use_container_width=True)
+    botao_enviar = st.form_submit_button(label="Enviar", use_container_width=True)
 
 # Lógica de processamento quando o usuário envia uma nova mensagem
 if botao_enviar and prompt_usuario:
@@ -244,85 +244,47 @@ if botao_enviar and prompt_usuario:
         with st.chat_message("assistant"):
             with st.spinner("Analisando sua solicitação..."):
 
-                # Mapeamento de siglas/variações para o nome oficial da zona no banco
-                MAPA_ZONAS = {
-                    "zl": "Zona Leste", "zona leste": "Zona Leste", "leste": "Zona Leste",
-                    "zo": "Zona Oeste", "zona oeste": "Zona Oeste", "oeste": "Zona Oeste",
-                    "zn": "Zona Norte", "zona norte": "Zona Norte", "norte": "Zona Norte",
-                    "zs": "Zona Sul",   "zona sul": "Zona Sul",     "sul": "Zona Sul",
-                    "centro": "Centro", "região central": "Centro", "centro sp": "Centro",
-                }
-
-                # Prompt atualizado: extrai material, bairro/nome E zona separadamente
+                # Instrução de prompt para o Gemini extrair os dados em formato estruturado (JSON)
                 prompt_sistema = """
                 Você é um assistente especialista em triagem de descarte de resíduos da cidade de São Paulo.
                 Sua única tarefa é ler a mensagem do usuário e extrair estruturadamente:
                 1. O MATERIAL ou objeto que ele deseja descartar (ex: entulho, sofá, lâmpada).
-                2. O BAIRRO ou nome de local específico mencionado (ex: Penha, Vila Esperança, Lapa).
-                3. A ZONA geográfica mencionada, se houver (ex: Zona Leste, ZL, ZO, Zona Sul, Centro).
-                   - Preencha 'zona' APENAS se o usuário mencionou explicitamente uma zona/região ampla.
-                   - Se mencionou bairro específico, deixe 'zona' como null.
-                   - Normalize siglas: ZL = Zona Leste, ZO = Zona Oeste, ZN = Zona Norte, ZS = Zona Sul.
-
-                Você DEVE responder única e exclusivamente com um objeto JSON válido contendo as chaves:
-                'material', 'bairro' e 'zona'.
-                Se não conseguir identificar alguma informação, preencha com null.
+                2. O BAIRRO ou Região que ele mencionou estar ou morar.
+                
+                Você DEVE responder única e exclusivamente com um objeto JSON válido contendo as chaves 'material' e 'bairro'.
+                Se você não conseguir identificar uma das informações, preencha o valor correspondente com null.
                 Não inclua nenhuma formatação markdown (como ```json) na resposta.
                 """
-
                 try:
-                    # Chama a IA com fallback automático (Gemini → Groq/Llama)
+                    # Chama a IA com fallback automático (Gemini → OpenAI)
                     dados_extraidos = chamar_ia_com_fallback(prompt_usuario, prompt_sistema)
-                    bairro_detectado  = dados_extraidos.get("bairro")
-                    zona_detectada    = dados_extraidos.get("zona")
+                    bairro_detectado = dados_extraidos.get("bairro")
                     material_detectado = dados_extraidos.get("material")
-                    modelo_usado      = dados_extraidos.get("_modelo_usado", "IA")
-
-                    # Normaliza a zona pelo mapa de siglas (cobre casos que a IA não normalizou)
-                    if zona_detectada:
-                        zona_detectada = MAPA_ZONAS.get(zona_detectada.lower().strip(), zona_detectada)
-
-                    # ── Tem bairro (com ou sem zona) → busca sempre em nome + bairro ──
+                    modelo_usado = dados_extraidos.get("_modelo_usado", "IA")
+                    
+                    # Se a IA conseguiu ler um bairro, busca no banco de dados
                     if bairro_detectado:
                         termo_busca = f"%{bairro_detectado}%"
-                        query_chat = """
-                            SELECT ecoponto, endereco, horario, zona, bairro, materiais_aceitos
-                            FROM vw_materiais_por_ecoponto
-                            WHERE ecoponto LIKE %s OR bairro LIKE %s
-                        """
+                        query_chat = "SELECT ecoponto, endereco, horario, zona, materiais_aceitos FROM vw_materiais_por_ecoponto WHERE bairro LIKE %s OR ecoponto LIKE %s"
                         ecopontos = executar_query(query_chat, (termo_busca, termo_busca))
-                        label_local = bairro_detectado
-
-                    # ── Só zona, sem bairro → traz todos da região ──
-                    elif zona_detectada:
-                        query_chat = """
-                            SELECT ecoponto, endereco, horario, zona, bairro, materiais_aceitos
-                            FROM vw_materiais_por_ecoponto
-                            WHERE zona = %s
-                        """
-                        ecopontos = executar_query(query_chat, (zona_detectada,))
-                        label_local = zona_detectada
-
+                        
+                        # Constrói o texto final de resposta com os ecopontos encontrados
+                        if ecopontos:
+                            resposta_final = f"Entendi que você quer descartar **{material_detectado or 'seus materiais'}** e está na região de **{bairro_detectado}**.<br><br>"
+                            resposta_final += "Aqui estão os pontos de coleta que encontrei para você:<br><br>"
+                            for eco in ecopontos:
+                                resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** ({eco['zona']})<br>"
+                                resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
+                                resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
+                                resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
+                        else:
+                            resposta_final = f"Identifiquei que você está em **{bairro_detectado}**, mas não localizei nenhum ecoponto correspondente cadastrado no banco da AWS."
                     else:
-                        ecopontos = []
-                        label_local = None
-
-                    # ── Monta a resposta ──
-                    if ecopontos:
-                        resposta_final = f"Entendi que você quer descartar **{material_detectado or 'seus materiais'}** e está em **{label_local}**.<br><br>"
-                        resposta_final += f"Encontrei **{len(ecopontos)}** ponto(s) de coleta para você:<br><br>"
-                        for eco in ecopontos:
-                            resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** — {eco['zona']}<br>"
-                            resposta_final += f"🏘️ Bairro: {eco.get('bairro', 'Não informado')}<br>"
-                            resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
-                            resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
-                            resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
-                    elif label_local:
-                        resposta_final = f"Identifiquei **{label_local}**, mas não localizei nenhum ecoponto correspondente no banco de dados."
-                    else:
-                        resposta_final = "Consegui entender o que você quer descartar, mas não captei seu **bairro ou região**. Pode informar onde você mora ou a zona (ex: Zona Leste, ZS)?"
+                        resposta_final = "Consegui entender o que você quer descartar, mas não captei o seu **bairro**. Pode digitar a sua região ou subprefeitura?"
 
                     # Adiciona a resposta da IA no histórico e atualiza a tela
+                    # Rodapé discreto informando qual modelo respondeu
+                    resposta_final += f'<br><sub style="color:#555">🤖 Respondido por: {modelo_usado}</sub>'
                     st.session_state.messages.append({"role": "assistant", "content": resposta_final})
                     st.rerun()
 
