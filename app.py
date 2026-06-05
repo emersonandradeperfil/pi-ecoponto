@@ -86,11 +86,18 @@ def buscar_ecopontos_por_zona(zona_filtro):
 
 st.markdown("""
     <style>
+        /* Remove o vão invisível gerado pelo componente de chat flutuante */
         iframe[title="st.components.v1.html"] {
             margin-bottom: -50px !important;
         }
         .stMainBlockContainer {
             padding-bottom: 2rem !important;
+        }
+        
+        /* GOLPE DE MESTRE: Oculta a mensagem de "Press Enter to submit" do chat_input */
+        .stChatInput [data-testid="stMarkdownContainer"] p, 
+        .stChatInput span {
+            display: none !important;
         }
     </style>
 """, unsafe_allow_html=True)
