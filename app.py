@@ -4,6 +4,7 @@ import json
 import mysql.connector
 from google import genai
 from google.genai import types
+from groq import Groq
 from dotenv import load_dotenv
 
 # ============================================================
@@ -20,6 +21,7 @@ def get_secret(key):
 # Tenta capturar as credenciais necessárias de forma segura
 try:
     GEMINI_API_KEY = get_secret("GEMINI_API_KEY")
+    GROQ_API_KEY = get_secret("GROQ_API_KEY")
     DB_HOST = get_secret("DB_HOST")
     DB_USER = get_secret("DB_USER")
     DB_PASSWORD = get_secret("DB_PASSWORD")
@@ -28,8 +30,55 @@ except KeyError as e:
     st.error(f"Erro de configuração: A chave {e} não foi encontrada.")
     st.stop()
 
-# Inicialização do cliente da API do Gemini (Inteligência Artificial)
-client = genai.Client(api_key=GEMINI_API_KEY)
+# Inicialização dos clientes de IA (Gemini principal + OpenAI fallback)
+client_gemini = genai.Client(api_key=GEMINI_API_KEY)
+client_groq = Groq(api_key=GROQ_API_KEY)
+
+# ============================================================
+#  [IA] FUNÇÃO COM FALLBACK AUTOMÁTICO GEMINI → GROQ
+# ============================================================
+def chamar_ia_com_fallback(prompt_usuario: str, prompt_sistema: str) -> dict:
+    """
+    Tenta extrair material e bairro via Gemini.
+    Se falhar por qualquer motivo (cota, erro, etc.), usa GPT-4o-mini como fallback.
+    Retorna sempre um dict com chaves 'material' e 'bairro'.
+    """
+    # ── Tentativa 1: Gemini ──
+    try:
+        response_groq = client_groq.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            temperature=0.1,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": prompt_sistema},
+                {"role": "user",   "content": prompt_usuario}
+            ]
+        )
+        dados = json.loads(response_groq.choices[0].message.content)
+        dados["_modelo_usado"] = "Llama 3.1 8B via Groq (fallback)"
+        return dados
+
+    except Exception as err_gemini:
+        # ── Fallback: OpenAI GPT-4o-mini ──
+        try:
+            config = types.GenerateContentConfig(
+                system_instruction=prompt_sistema,
+                response_mime_type="application/json",
+                temperature=0.1
+            )
+            response = client_gemini.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt_usuario,
+                config=config
+            )
+            dados = json.loads(response.text)
+            dados["_modelo_usado"] = "Gemini 2.5 Flash"
+            return dados
+
+        except Exception as err_openai:
+            raise RuntimeError(
+                f"Ambas as IAs falharam.\nGemini: {err_gemini}\nOpenAI: {err_openai}"
+            )
 
 # ============================================================
 #  [BANCO DE DADOS] FUNÇÕES DE CONSULTA SQL (MARIADB AWS)
@@ -86,18 +135,14 @@ def buscar_ecopontos_por_zona(zona_filtro):
 
 st.markdown("""
     <style>
-        /* Remove o vão invisível gerado pelo componente de chat flutuante */
-        iframe[title="st.components.v1.html"] {
-            margin-bottom: -50px !important;
-        }
+        /* Remove vão extra no rodapé da página */
         .stMainBlockContainer {
             padding-bottom: 2rem !important;
         }
-        
-        /* GOLPE DE MESTRE: Oculta a mensagem de "Press Enter to submit" do chat_input */
-        .stChatInput [data-testid="stMarkdownContainer"] p, 
-        .stChatInput span {
-            display: none !important;
+        /* Alinha botão Enviar verticalmente com o input */
+        div[data-testid="column"]:last-child .stFormSubmitButton button {
+            margin-top: 0px;
+            height: 38px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -131,25 +176,68 @@ with box_historico:
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True)
 
-# Formulário Inline do Chat (Mantém a caixa de texto presa logo abaixo do histórico)
+# Formulário Inline do Chat (caixa fixa abaixo do histórico, sem flutuar)
+# CSS: esconde hint, estiliza input+botão responsivo
+st.markdown("""
+<style>
+/* ── Esconde "Press Enter to submit form" ── */
+[data-testid="InputInstructions"] {
+    display: none !important;
+}
+
+/* ── Container do form: sem gap entre input e botão ── */
+div[data-testid="stForm"] > div[data-testid="stVerticalBlock"] {
+    gap: 0.4rem !important;
+}
+
+/* ── Input: padding direito para não sobrepor texto ── */
+div[data-testid="stForm"] input[type="text"] {
+    padding-right: 1rem !important;
+    border-radius: 8px 8px 0 0 !important;
+    border-bottom: none !important;
+}
+
+/* ── Botão: largura total, gruda abaixo do input ── */
+div[data-testid="stForm"] button[kind="formSubmit"] {
+    width: 100% !important;
+    border-radius: 0 0 8px 8px !important;
+    background-color: #2e7d32 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+}
+div[data-testid="stForm"] button[kind="formSubmit"]:hover {
+    background-color: #1b5e20 !important;
+}
+
+/* ── Remove margem extra do stFormSubmitButton ── */
+div[data-testid="stFormSubmitButton"] {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 with st.form(key="chat_form_inline", clear_on_submit=True):
-    col_input, col_btn = st.columns([0.92, 0.08])
-    with col_input:
-        prompt_usuario = st.text_input(
-            label="Digite sua mensagem",
-            placeholder="Ex: Quero descartar restos de obra e moro na Penha",
-            label_visibility="collapsed" # Oculta a legenda padrão do input
-        )
-    with col_btn:
-        botao_enviar = st.form_submit_button(label="Enviar", use_container_width=True)
+    prompt_usuario = st.text_input(
+        label="Digite sua mensagem",
+        placeholder="Ex: Quero descartar restos de obra e moro na Penha",
+        label_visibility="collapsed"
+    )
+    botao_enviar = st.form_submit_button(label="Enviar", use_container_width=True)
 
 # Lógica de processamento quando o usuário envia uma nova mensagem
-if (botao_enviar or prompt_usuario) and prompt_usuario:
-    # 1. Desenha a mensagem enviada pelo usuário na tela e salva no histórico
+if botao_enviar and prompt_usuario:
+    # 1. Adiciona imediatamente a mensagem do usuário na tela e no histórico
+    st.session_state.messages.append({"role": "user", "content": prompt_usuario})
     with box_historico:
         with st.chat_message("user"):
             st.markdown(prompt_usuario)
-    st.session_state.messages.append({"role": "user", "content": prompt_usuario})
 
     # 2. Processa a resposta da Inteligência Artificial
     with box_historico:
@@ -167,24 +255,12 @@ if (botao_enviar or prompt_usuario) and prompt_usuario:
                 Se você não conseguir identificar uma das informações, preencha o valor correspondente com null.
                 Não inclua nenhuma formatação markdown (como ```json) na resposta.
                 """
-                config = types.GenerateContentConfig(
-                    system_instruction=prompt_sistema,
-                    response_mime_type="application/json",
-                    temperature=0.1
-                )
-                
                 try:
-                    # Chamada oficial à API do Gemini
-                    response = client.models.generate_content(
-                        model="gemini-2.5-flash",
-                        contents=prompt_usuario,
-                        config=config
-                    )
-                    
-                    # Decodifica o JSON retornado pela IA
-                    dados_extraidos = json.loads(response.text)
+                    # Chama a IA com fallback automático (Gemini → OpenAI)
+                    dados_extraidos = chamar_ia_com_fallback(prompt_usuario, prompt_sistema)
                     bairro_detectado = dados_extraidos.get("bairro")
                     material_detectado = dados_extraidos.get("material")
+                    modelo_usado = dados_extraidos.get("_modelo_usado", "IA")
                     
                     # Se a IA conseguiu ler um bairro, busca no banco de dados
                     if bairro_detectado:
@@ -207,6 +283,8 @@ if (botao_enviar or prompt_usuario) and prompt_usuario:
                         resposta_final = "Consegui entender o que você quer descartar, mas não captei o seu **bairro**. Pode digitar a sua região ou subprefeitura?"
 
                     # Adiciona a resposta da IA no histórico e atualiza a tela
+                    # Rodapé discreto informando qual modelo respondeu
+                    resposta_final += f'<br><sub style="color:#555">🤖 Respondido por: {modelo_usado}</sub>'
                     st.session_state.messages.append({"role": "assistant", "content": resposta_final})
                     st.rerun()
 
@@ -286,7 +364,9 @@ if zona_selecionada != "Selecione...":
 # ============================================================
 #  [SEÇÃO 4] WIDGET ADICIONAL: CHAT FLUTUANTE (ECOCHAT)
 # ============================================================
-URL_DO_CHAT = "https://pi-ecoponto.streamlit.app/?embed=true"
+# URL_DO_CHAT = "https://pi-ecoponto.streamlit.app/?embed=true"
+
+URL_DO_CHAT = "http://localhost:8501/?embed=true"
 
 # Estrutura HTML/CSS/JS injetada de forma oculta para criar o botão flutuante redondo (Canto inferior direito)
 codigo_html_chat = f"""
