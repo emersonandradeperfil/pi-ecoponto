@@ -10,10 +10,7 @@ from database.conexao import buscar_ecopontos_por_zona
 st.set_page_config(page_title="Região - PI Ecoponto", page_icon="🔍", layout="wide")
 renderizar_estilos_globais()
 
-# st.title("🔍 Região")
-# st.write("Selecione uma região para ver todos os ecopontos disponíveis.")
-# st.markdown("---")
-
+st.write("🔍 Busca por Região")
 zona_selecionada = st.selectbox(
     "Selecione uma região para ver todos os ecopontos disponíveis.",
     ["Selecione...", "Zona Leste", "Zona Oeste", "Zona Norte", "Zona Sul", "Centro"],

@@ -10,10 +10,7 @@ from database.conexao import carregar_unidades_do_banco, buscar_por_unidade_dire
 st.set_page_config(page_title="Unidade - PI Ecoponto", page_icon="🏢", layout="wide")
 renderizar_estilos_globais()
 
-# st.title("🏢 Unidade")
-# st.write("Selecione um ecoponto para ver seus detalhes.")
-# st.markdown("---")
-
+st.write("🏢 Busa por Unidade")
 lista_unidades = carregar_unidades_do_banco()
 
 unidade_selecionada = st.selectbox(
