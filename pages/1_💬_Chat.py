@@ -11,7 +11,7 @@ from database.conexao import buscar_por_texto_livre, buscar_ecopontos_por_zona
 st.set_page_config(page_title="Chat - PI Ecoponto", page_icon="💬", layout="wide")
 renderizar_estilos_globais()
 
-st.title("💬 Chat")
+# st.title("💬 Chat")
 # st.write("Digite o que você quer descartar e onde você mora (bairro ou zona).")
 # st.markdown("---")
 
