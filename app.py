@@ -15,8 +15,8 @@ renderizar_estilos_globais()
 
 st.title("🌱 PI sobre Ecopontos de SP")
 st.write(
-    "Bem-vindo! Use o menu lateral para acessar o **Assistente Virtual (Chat)**, "
-    "a **Busca por Unidade** ou a **Busca por Região**."
+    
+    "Sistema desenvolvido para ajudar você a encontrar **ecopontos** oficiais na cidade de **São Paulo**."
 )
 st.markdown("---")
 
