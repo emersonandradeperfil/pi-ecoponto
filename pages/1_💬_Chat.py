@@ -12,7 +12,7 @@ st.set_page_config(page_title="Chat - PI Ecoponto", page_icon="💬", layout="wi
 renderizar_estilos_globais()
 
 st.title("💬 Assistente Virtual")
-st.write("Digite o que você quer descartar e onde você mora (bairro ou zona).")
+# st.write("Digite o que você quer descartar e onde você mora (bairro ou zona).")
 st.markdown("---")
 
 if "messages" not in st.session_state:
@@ -67,7 +67,7 @@ div[data-testid="stFormSubmitButton"] {
 with st.form(key="chat_form_inline", clear_on_submit=True):
     prompt_usuario = st.text_input(
         label="Digite sua mensagem",
-        placeholder="Ex: Quero descartar restos de obra e moro na Penha",
+        placeholder="Digite aqui o que quer descartar e sua região...",
         label_visibility="collapsed"
     )
     botao_enviar = st.form_submit_button(label="✉️  Enviar mensagem", use_container_width=True)
