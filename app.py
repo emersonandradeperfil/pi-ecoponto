@@ -24,9 +24,9 @@ st.subheader("Como usar")
 st.markdown("""
 Clique no ícone ">>" no canto superior esquerdo para abrir o menu e escolha uma das opções de busca:
 
-- **💬 Chat** — converse com o assistente e descreva o que quer descartar e onde você mora.
-- **🏢 Unidade** — selecione um ecoponto específico para ver seus detalhes.
-- **🔍 Região** — veja todos os ecopontos de uma zona da cidade.
+- **💬 Chat** - Converse com o assistente virtual.
+- **🏢 Unidade** - Selecione um ecoponto específico.
+- **🔍 Região** - Veja todos os ecopontos de uma zona.
 """)
 
 renderizar_chat_flutuante()
