@@ -404,7 +404,7 @@ if zona_selecionada != "Selecione...":
 # ============================================================
 # URL_DO_CHAT = "https://pi-ecoponto.streamlit.app/?embed=true"
 
-URL_DO_CHAT = "http://localhost:8501/?embed=true"
+URL_DO_CHAT = "http://localhost:5500/?embed=true"
 
 # Estrutura HTML/CSS/JS injetada de forma oculta para criar o botão flutuante redondo (Canto inferior direito)
 codigo_html_chat = f"""
