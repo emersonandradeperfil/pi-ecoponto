@@ -13,15 +13,15 @@ renderizar_estilos_globais()
 
 st.title("💬 Assistente Virtual")
 # st.write("Digite o que você quer descartar e onde você mora (bairro ou zona).")
-st.markdown("---")
+# st.markdown("---")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Olá! Sou o seu assistente ambiental. Como posso te ajudar hoje? Pode digitar o que quer descartar e a sua região."}
+        {"role": "assistant", "content": "Olá! Sou o seu assistente ambiental, como posso te ajudar hoje?"}
     ]
 
 # Cria e gerencia a memória da conversa no estado do Streamlit (session_state)
-box_historico = st.container(height=400, border=True)
+box_historico = st.container(height=310, border=True)
 with box_historico:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -32,9 +32,11 @@ st.markdown("""
 <style>
 [data-testid="InputInstructions"] {
     display: none !important;
+    
 }
 div[data-testid="stForm"] > div[data-testid="stVerticalBlock"] {
     gap: 0.4rem !important;
+    
 }
 div[data-testid="stForm"] input[type="text"] {
     padding-right: 1rem !important;
