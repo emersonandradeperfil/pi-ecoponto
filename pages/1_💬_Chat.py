@@ -21,7 +21,7 @@ if "messages" not in st.session_state:
     ]
 
 # Cria e gerencia a memória da conversa no estado do Streamlit (session_state)
-box_historico = st.container(height=310, border=True)
+box_historico = st.container(height=300, border=True)
 with box_historico:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
