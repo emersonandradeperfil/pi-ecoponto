@@ -11,11 +11,11 @@ st.set_page_config(page_title="Região - PI Ecoponto", page_icon="🔍", layout=
 renderizar_estilos_globais()
 
 st.title("🔍 Busca por Região")
-st.write("Selecione uma região para ver todos os ecopontos disponíveis.")
-st.markdown("---")
+# st.write("Selecione uma região para ver todos os ecopontos disponíveis.")
+# st.markdown("---")
 
 zona_selecionada = st.selectbox(
-    "Selecione a Região:",
+    "Selecione uma região para ver todos os ecopontos disponíveis.",
     ["Selecione...", "Zona Leste", "Zona Oeste", "Zona Norte", "Zona Sul", "Centro"],
     key="filtro_zona_regiao"
 )

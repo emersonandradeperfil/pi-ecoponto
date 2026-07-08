@@ -11,13 +11,13 @@ st.set_page_config(page_title="Unidade - PI Ecoponto", page_icon="🏢", layout=
 renderizar_estilos_globais()
 
 st.title("🏢 Busca por Unidade")
-st.write("Selecione um ecoponto para ver seus detalhes.")
-st.markdown("---")
+# st.write("Selecione um ecoponto para ver seus detalhes.")
+# st.markdown("---")
 
 lista_unidades = carregar_unidades_do_banco()
 
 unidade_selecionada = st.selectbox(
-    "Selecione a unidade:",
+    "Selecione uma unidade do ecoponto para ver seus detalhes.",
     ["Selecione..."] + lista_unidades,
     key="filtro_unidade_direta"
 )
