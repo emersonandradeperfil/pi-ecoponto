@@ -14,7 +14,7 @@ renderizar_estilos_globais()
 st.write("💬 Assistente Virtual")
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Olá! Sou o seu assistente ambiental, como posso te ajudar hoje?"}
+        {"role": "assistant", "content": "Olá! Sou o seu assistente ambiental. Para que eu possa te ajudar, informe o material que deseja descartar e o seu bairro ou região."}
     ]
 
 # Cria e gerencia a memória da conversa no estado do Streamlit (session_state)
