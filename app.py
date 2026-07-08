@@ -13,12 +13,12 @@ from components.layout import (
 st.set_page_config(page_title="PI - Ecoponto", page_icon="🌱", layout="wide")
 renderizar_estilos_globais()
 
-st.title("🌱 PI sobre Ecopontos de SP")
+st.title("🌱 Ecopontos de SP")
 st.write(
     
     "Sistema desenvolvido para ajudar você a encontrar **ecopontos** oficiais na cidade de **São Paulo**."
 )
-st.markdown("---")
+# st.markdown("---")
 
 st.subheader("Como usar")
 st.markdown("""
