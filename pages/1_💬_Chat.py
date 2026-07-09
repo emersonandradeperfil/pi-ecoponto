@@ -1,7 +1,7 @@
 import streamlit as st
 
 from components.layout import renderizar_estilos_globais, renderizar_chat_flutuante, renderizar_rodape
-from services.ia_service import chamar_ia_com_fallback, normalizar_zona, PROMPT_SISTEMA_EXTRACAO
+from services.ia_service import chamar_ia_com_fallback, normalizar_zona, PROMPT_SISTEMA_CONSULTOR
 from database.conexao import buscar_por_texto_livre, buscar_ecopontos_por_zona
 
 # ============================================================
@@ -11,11 +11,21 @@ from database.conexao import buscar_por_texto_livre, buscar_ecopontos_por_zona
 st.set_page_config(page_title="Chat - PI Ecoponto", page_icon="💬", layout="wide")
 renderizar_estilos_globais()
 
-st.write("💬 Assistente Virtual")
+MENSAGEM_INICIAL = (
+    "Olá! Sou o consultor virtual do Ecoponto SP, você sabe o que é um ecoponto ?"
+)
+
+JANELA_HISTORICO_IA = 12        # nº máx. de mensagens enviadas à IA por chamada (controle de tokens)
+
+# ------------------------------------------------------------
+# Inicialização do estado de sessão
+# ------------------------------------------------------------
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": "Olá! Sou o seu assistente ambiental. Para que eu possa te ajudar, informe o material que deseja descartar e o seu bairro ou região."}
-    ]
+    st.session_state.messages = [{"role": "assistant", "content": MENSAGEM_INICIAL}]
+if "dados_coletados" not in st.session_state:
+    st.session_state.dados_coletados = {"material": None, "bairro": None, "zona": None}
+
+st.write("💬 Assistente Virtual")
 
 # Cria e gerencia a memória da conversa no estado do Streamlit (session_state)
 box_historico = st.container(height=300, border=True)
@@ -73,6 +83,7 @@ with st.form(key="chat_form_inline", clear_on_submit=True):
 
 # Lógica de processamento quando o usuário envia uma nova mensagem
 if botao_enviar and prompt_usuario:
+
     # 1. Adiciona imediatamente a mensagem do usuário na tela e no histórico
     st.session_state.messages.append({"role": "user", "content": prompt_usuario})
     with box_historico:
@@ -84,40 +95,66 @@ if botao_enviar and prompt_usuario:
         with st.chat_message("assistant"):
             with st.spinner("Analisando sua solicitação..."):
                 try:
-                    # Chama a IA com fallback automático (Gemini → Groq/Llama)
-                    dados_extraidos = chamar_ia_com_fallback(prompt_usuario, PROMPT_SISTEMA_EXTRACAO)
-                    bairro_detectado = dados_extraidos.get("bairro")
-                    zona_detectada = normalizar_zona(dados_extraidos.get("zona"))
-                    material_detectado = dados_extraidos.get("material")
+                    # Envia o histórico (janela recente) para a IA, dando memória de curto prazo.
+                    # Exclui a mensagem inicial fixa (índice 0), que é só texto de boas-vindas
+                    # e não agrega informação real para a IA.
+                    historico_para_ia = st.session_state.messages[1:][-JANELA_HISTORICO_IA:]
 
-                    # ── Tem bairro (com ou sem zona) → busca sempre em nome + bairro ──
-                    if bairro_detectado:
-                        ecopontos = buscar_por_texto_livre(f"%{bairro_detectado}%")
-                        label_local = bairro_detectado
+                    dados_extraidos = chamar_ia_com_fallback(historico_para_ia, PROMPT_SISTEMA_CONSULTOR)
 
-                    # ── Só zona, sem bairro → traz todos da região ──
-                    elif zona_detectada:
-                        ecopontos = buscar_ecopontos_por_zona(zona_detectada)
-                        label_local = zona_detectada
+                    resposta_ia = dados_extraidos.get(
+                        "resposta_ao_usuario",
+                        "Desculpe, não consegui processar sua mensagem agora. Pode reformular?"
+                    )
 
-                    else:
-                        ecopontos = []
-                        label_local = None
+                    # ── Atualiza os "slots" de dados coletados, sem perder o que já foi dito antes ──
+                    if dados_extraidos.get("material"):
+                        st.session_state.dados_coletados["material"] = dados_extraidos["material"]
+                    if dados_extraidos.get("bairro"):
+                        st.session_state.dados_coletados["bairro"] = dados_extraidos["bairro"]
+                        st.session_state.dados_coletados["zona"] = None  # bairro tem prioridade sobre zona
+                    if dados_extraidos.get("zona") and not st.session_state.dados_coletados["bairro"]:
+                        st.session_state.dados_coletados["zona"] = normalizar_zona(dados_extraidos["zona"])
 
-                    # ── Monta a resposta ──
-                    if ecopontos:
-                        resposta_final = f"Entendi que você quer descartar **{material_detectado or 'seus materiais'}** e está em **{label_local}**.<br><br>"
-                        resposta_final += f"Encontrei **{len(ecopontos)}** ponto(s) de coleta para você:<br><br>"
-                        for eco in ecopontos:
-                            resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** — {eco['zona']}<br>"
-                            resposta_final += f"🏘️ Bairro: {eco.get('bairro', 'Não informado')}<br>"
-                            resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
-                            resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
-                            resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
-                    elif label_local:
-                        resposta_final = f"Identifiquei **{label_local}**, mas não localizei nenhum ecoponto correspondente no banco de dados."
-                    else:
-                        resposta_final = "Consegui entender o que você quer descartar, mas não captei seu **bairro ou região**. Pode informar onde você mora ou a zona (ex: Zona Leste, ZS)?"
+                    material_detectado = st.session_state.dados_coletados["material"]
+                    bairro_detectado = st.session_state.dados_coletados["bairro"]
+                    zona_detectada = st.session_state.dados_coletados["zona"]
+
+                    pronto_para_buscar = bool(dados_extraidos.get("pronto_para_buscar")) and (
+                        bool(material_detectado) and (bool(bairro_detectado) or bool(zona_detectada))
+                    )
+
+                    resposta_final = resposta_ia
+
+                    if pronto_para_buscar:
+                        # ── Tem bairro (com ou sem zona) → busca sempre em nome + bairro ──
+                        if bairro_detectado:
+                            ecopontos = buscar_por_texto_livre(f"%{bairro_detectado}%")
+                            label_local = bairro_detectado
+                        # ── Só zona, sem bairro → traz todos da região ──
+                        elif zona_detectada:
+                            ecopontos = buscar_ecopontos_por_zona(zona_detectada)
+                            label_local = zona_detectada
+                        else:
+                            ecopontos = []
+                            label_local = None
+
+                        if ecopontos:
+                            resposta_final += (
+                                f"<br><br>Encontrei **{len(ecopontos)}** ponto(s) de coleta para "
+                                f"**{material_detectado}** em **{label_local}**:<br><br>"
+                            )
+                            for eco in ecopontos:
+                                resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** — {eco['zona']}<br>"
+                                resposta_final += f"🏘️ Bairro: {eco.get('bairro', 'Não informado')}<br>"
+                                resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
+                                resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
+                                resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
+                        elif label_local:
+                            resposta_final += (
+                                f"<br><br>Identifiquei **{label_local}**, mas não localizei nenhum "
+                                f"ecoponto correspondente no banco de dados."
+                            )
 
                     # Adiciona a resposta da IA no histórico e atualiza a tela
                     st.session_state.messages.append({"role": "assistant", "content": resposta_final})
