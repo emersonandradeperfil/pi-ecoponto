@@ -35,40 +35,70 @@ with box_historico:
             st.markdown(message["content"], unsafe_allow_html=True)
 
 # CSS específico do formulário de chat inline (esconde hint, estiliza input+botão)
+# O botão fica sobreposto (position: absolute) dentro do próprio campo de texto,
+# encostado na borda direita — por isso o input ganha um padding-right extra,
+# pra o texto digitado não passar por baixo do botão.
 st.markdown("""
 <style>
 [data-testid="InputInstructions"] {
     display: none !important;
-    
 }
-div[data-testid="stForm"] > div[data-testid="stVerticalBlock"] {
-    gap: 0.4rem !important;
-    
+
+/* Bloco que contém o input e o botão vira uma linha (flex), lado a lado,
+   sem espaço entre eles — assim dá pra "colar" as bordas dos dois e criar
+   a sensação de uma peça só, com o botão na ponta direita do campo.
+   Usamos [data-testid^="stVerticalBlock"] (com ^, "começa com") pra
+   funcionar mesmo se o Streamlit mudar/adicionar sufixos no testid. */
+div[data-testid="stForm"] div[data-testid^="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 0 !important;
 }
+
+/* 1º item da linha = bloco do input → ocupa todo o espaço que sobrar */
+div[data-testid="stForm"] div[data-testid^="stVerticalBlock"] > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+/* 2º item da linha = bloco do botão → largura fixa */
+div[data-testid="stForm"] div[data-testid^="stVerticalBlock"] > div:last-child {
+    flex: 0 0 56px !important;
+    display: flex !important;
+}
+
+/* Campo de texto: arredondado só do lado esquerdo, sem borda no lado
+   que encosta no botão, pra parecer uma peça só */
 div[data-testid="stForm"] input[type="text"] {
-    padding-right: 1rem !important;
-    border-radius: 8px 8px 0 0 !important;
-    border-bottom: none !important;
+    height: 44px !important;
+    border-radius: 8px 0 0 8px !important;
+    border-right: none !important;
+}
+
+/* Botão preenche 100% da altura/largura do seu bloco e arredonda só
+   do lado direito */
+div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 div[data-testid="stForm"] button[kind="formSubmit"] {
     width: 100% !important;
-    border-radius: 0 0 8px 8px !important;
+    height: 44px !important;
+    border-radius: 0 8px 8px 0 !important;
     background-color: #2e7d32 !important;
     color: white !important;
     border: none !important;
-    padding: 0.45rem 1rem !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.02em !important;
+    padding: 0 !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
     cursor: pointer !important;
     transition: background 0.2s !important;
 }
 div[data-testid="stForm"] button[kind="formSubmit"]:hover {
     background-color: #1b5e20 !important;
-}
-div[data-testid="stFormSubmitButton"] {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -79,7 +109,7 @@ with st.form(key="chat_form_inline", clear_on_submit=True):
         placeholder="Digite aqui o que quer descartar e sua região...",
         label_visibility="collapsed"
     )
-    botao_enviar = st.form_submit_button(label="✉️  Enviar mensagem", use_container_width=True)
+    botao_enviar = st.form_submit_button(label="➤", use_container_width=True)
 
 # Lógica de processamento quando o usuário envia uma nova mensagem
 if botao_enviar and prompt_usuario:
