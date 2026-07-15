@@ -1,3 +1,4 @@
+import urllib.parse
 import streamlit as st
 
 from components.layout import renderizar_estilos_globais, renderizar_chat_flutuante, renderizar_rodape
@@ -12,7 +13,7 @@ st.set_page_config(page_title="Chat - PI Ecoponto", page_icon="💬", layout="wi
 renderizar_estilos_globais()
 
 MENSAGEM_INICIAL = (
-    "Olá! Sou o consultor virtual do Ecoponto SP, você sabe o que é um ecoponto ?"
+    "Ola!"
 )
 
 JANELA_HISTORICO_IA = 12        # nº máx. de mensagens enviadas à IA por chamada (controle de tokens)
@@ -106,7 +107,7 @@ div[data-testid="stForm"] button[kind="formSubmit"]:hover {
 with st.form(key="chat_form_inline", clear_on_submit=True):
     prompt_usuario = st.text_input(
         label="Digite sua mensagem",
-        placeholder="Digite aqui o que quer descartar e sua região...",
+        placeholder="Digite sua mensagem...",
         label_visibility="collapsed"
     )
     botao_enviar = st.form_submit_button(label="➤", use_container_width=True)
@@ -175,11 +176,31 @@ if botao_enviar and prompt_usuario:
                                 f"**{material_detectado}** em **{label_local}**:<br><br>"
                             )
                             for eco in ecopontos:
+
+                                busca_endereco = f"Ecoponto {eco['ecoponto']}, {eco['endereco']}"
+                                endereco_codificado = urllib.parse.quote(busca_endereco)
+
+                                link_maps = f"https://www.google.com/maps/search/?api=1&query={endereco_codificado}"
+                                link_waze = f"https://waze.com/ul?q={endereco_codificado}&navigate=yes"
+
                                 resposta_final += f"📍 **Ecoponto {eco['ecoponto']}** — {eco['zona']}<br>"
                                 resposta_final += f"🏘️ Bairro: {eco.get('bairro', 'Não informado')}<br>"
                                 resposta_final += f"🏠 Endereço: {eco['endereco']}<br>"
                                 resposta_final += f"🕒 Funcionamento: {eco['horario']}<br>"
-                                resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br><br>"
+                                resposta_final += f"🗑️ Materiais: {eco.get('materiais_aceitos', 'Não informado')}<br>"
+
+                                resposta_final += (
+                                    f'<div style="display:flex;gap:12px;width:100%;margin-top:10px;margin-bottom:20px;font-family:sans-serif;">'
+                                    f'<a href="{link_maps}" target="_blank" style="text-decoration:none;flex:1;color:inherit;">'
+                                    f'<div style="display:flex;align-items:center;justify-content:center;gap:8px;background-color:#e6e6e6;border:2px solid red;border-radius:8px;padding:8px 12px;font-weight:bold;font-size:14px;color: black;cursor:pointer;">'
+                                    f'<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/500px-Google_Maps_icon_%282020%29.svg.png?_=20200218211225" width="18px" height="18px"/> Maps'
+                                    f'</div></a>'
+                                    f'<a href="{link_waze}" target="_blank" style="text-decoration:none;flex:1;color:inherit;">'
+                                    f'<div style="display:flex;align-items:center;justify-content:center;gap:8px;background-color:#e6e6e6;border:2px solid #2db5e0;border-radius:10px;padding:8px 12px;font-weight:bold;font-size:14px;color: black;cursor:pointer;">'
+                                    f'<img src="https://logo-teka.com/wp-content/uploads/2026/01/waze-icon-logo.svg" width="18px" height="18px"/> Waze'
+                                    f'</div></a></div>'
+                                )                                      
+
                         elif label_local:
                             resposta_final += (
                                 f"<br><br>Identifiquei **{label_local}**, mas não localizei nenhum "
