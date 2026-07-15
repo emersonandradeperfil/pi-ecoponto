@@ -45,7 +45,7 @@ if unidade_selecionada != "Selecione...":
             with col1:
                 # Botão Google Maps
                 st.markdown(
-                    f'<a href="{link_maps}" target="_blank" style="text-decoration: none;">'
+                    f'<a href="{link_maps}" target="_blank" style="text-decoration: none; color: black;">'
                     f'<div style="display: flex; align-items: center; justify-content: center; '
                     f'background-color: #e6e6e6; border: 2px solid red; border-radius: 8px; '
                     f'padding: 8px 16px; font-weight: bold; cursor: pointer;">'
@@ -58,10 +58,10 @@ if unidade_selecionada != "Selecione...":
             with col2:
                 # Botão Waze
                 st.markdown(
-                    f'<a href="{link_waze}" target="_blank" style="text-decoration: none;">'
+                    f'<a href="{link_waze}" target="_blank" style="text-decoration: none; color: black;">'
                     f'<div style="display: flex; align-items: center; justify-content: center; '
                     f'background-color: #e6e6e6; border: 2px solid #2db5e0; border-radius: 10px; '
-                    f'padding: 8px 16px; color: white; font-weight: bold; cursor: pointer;">'
+                    f'padding: 8px 16px; font-weight: bold; cursor: pointer;">'
                     f'<img src="https://logo-teka.com/wp-content/uploads/2026/01/waze-icon-logo.svg" width="20px" height="20px"/>'
                     f' Waze'
                     f'</div></a>', 
