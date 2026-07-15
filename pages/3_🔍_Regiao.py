@@ -51,7 +51,7 @@ if zona_selecionada != "Selecione...":
                 
         
                 <div style="display: flex; gap: 12px; width: 100%;">
-                    <a href="{link_maps}" target="_blank" style="text-decoration: none; flex: 1;">
+                    <a href="{link_maps}" target="_blank" style="text-decoration: none; color: black; flex: 1;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; 
                                     background-color: #e6e6e6; border: 2px solid red; border-radius: 8px; 
                                     padding: 8px 12px; color: #333333; font-weight: bold; font-size: 14px; cursor: pointer;">
@@ -60,7 +60,7 @@ if zona_selecionada != "Selecione...":
                         </div>
                     </a>
             
-                    <a href="{link_waze}" target="_blank" style="text-decoration: none; flex: 1;">
+                    <a href="{link_waze}" target="_blank" style="text-decoration: none; color: black; flex: 1;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; 
                                     background-color: #e6e6e6; border: 2px solid #2db5e0; border-radius: 10px; 
                                     padding: 8px 12px; color: #333333; font-weight: bold; font-size: 14px; cursor: pointer;">
