@@ -160,11 +160,11 @@ if botao_enviar and prompt_usuario:
                     if pronto_para_buscar:
                         # ── Tem bairro (com ou sem zona) → busca sempre em nome + bairro ──
                         if bairro_detectado:
-                            ecopontos = buscar_por_texto_livre(bairro_detectado)
+                            ecopontos = buscar_por_texto_livre(bairro_detectado, material_detectado)
                             label_local = bairro_detectado
                         # ── Só zona, sem bairro → traz todos da região ──
                         elif zona_detectada:
-                            ecopontos = buscar_ecopontos_por_zona(zona_detectada)
+                            ecopontos = buscar_ecopontos_por_zona(zona_detectada, material_detectado)
                             label_local = zona_detectada
                         else:
                             ecopontos = []
@@ -213,7 +213,7 @@ if botao_enviar and prompt_usuario:
                         elif label_local:
                             resposta_final += (
                                 f"<br><br>Identifiquei **{label_local}**, mas não localizei nenhum "
-                                f"ecoponto correspondente no banco de dados."
+                                f"ecoponto que aceite **{material_detectado}** nessa região."
                             )
 
                     # Adiciona a resposta da IA no histórico e atualiza a tela

@@ -183,16 +183,26 @@ def buscar_por_unidade_direta(nome_unidade):
 # [CONSULTA] BUSCA POR ZONA
 # ============================================================
 
-def buscar_ecopontos_por_zona(zona_filtro):
+def buscar_ecopontos_por_zona(zona_filtro, material=None):
 
     try:
         colecao = obter_colecao()
 
+        filtro = {
+            "zona": zona_filtro,
+            "ativo": True
+        }
+
+        # Se um material foi informado, filtra também pelos
+        # materiais aceitos (busca por substring, ignora maiúsc/minúsc).
+        if material:
+            filtro["materiais_aceitos"] = {
+                "$regex": re.escape(material),
+                "$options": "i"
+            }
+
         resultados = colecao.find(
-            {
-                "zona": zona_filtro,
-                "ativo": True
-            },
+            filtro,
             {
                 "_id": 0,
                 "ecoponto": 1,
@@ -221,12 +231,14 @@ def buscar_ecopontos_por_zona(zona_filtro):
 # [CONSULTA] BUSCA POR TEXTO LIVRE
 # ============================================================
 
-def buscar_por_texto_livre(termo_busca):
+def buscar_por_texto_livre(termo_busca, material=None):
     """
     Usado pelo chatbot.
 
     Busca pelo nome do ecoponto OU pelo bairro,
     mantendo o mesmo comportamento do banco antigo.
+    Se 'material' for informado, filtra também pelos
+    materiais aceitos naquele ecoponto.
     """
 
     try:
@@ -236,24 +248,32 @@ def buscar_por_texto_livre(termo_busca):
         # sejam interpretados de forma indesejada pelo regex.
         termo_seguro = re.escape(termo_busca)
 
-        resultados = colecao.find(
-            {
-                "ativo": True,
-                "$or": [
-                    {
-                        "ecoponto": {
-                            "$regex": termo_seguro,
-                            "$options": "i"
-                        }
-                    },
-                    {
-                        "bairro": {
-                            "$regex": termo_seguro,
-                            "$options": "i"
-                        }
+        filtro = {
+            "ativo": True,
+            "$or": [
+                {
+                    "ecoponto": {
+                        "$regex": termo_seguro,
+                        "$options": "i"
                     }
-                ]
-            },
+                },
+                {
+                    "bairro": {
+                        "$regex": termo_seguro,
+                        "$options": "i"
+                    }
+                }
+            ]
+        }
+
+        if material:
+            filtro["materiais_aceitos"] = {
+                "$regex": re.escape(material),
+                "$options": "i"
+            }
+
+        resultados = colecao.find(
+            filtro,
             {
                 "_id": 0,
                 "ecoponto": 1,

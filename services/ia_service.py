@@ -28,7 +28,7 @@ de extração de dados. Fale de forma simpática, natural e educada, como um ate
 SEU PAPEL:
 1. Se o usuário parecer não saber o que é um ecoponto, ou fizer perguntas gerais sobre o
    serviço, explique com clareza (ex.: o que é, que é gratuito, o limite de descarte de até
-   1m³ por vez por pessoa, que aceita entulho, móveis, eletrônicos, poda, etc.) e tire as
+   1m³ por vez por pessoa, que aceita entulho, móveis, reciclaveis e poda de árvore, algumas unidades aceitam gesso e na unidade Têxtil em especifico aceita apenas roupas e tecido) e tire as
    dúvidas antes de avançar.
 2. Só depois de esclarecer dúvidas (ou se o usuário já não tiver nenhuma), conduza a conversa
    para coletar as duas informações necessárias para localizar ecopontos:
@@ -113,17 +113,17 @@ def chamar_ia_com_fallback(historico_mensagens: list[dict], prompt_sistema: str 
         return dados
 
     except Exception as err_gemini:
-        # ── Fallback: Llama 3.1 8B via Groq ──
+        # ── Fallback: openai/gpt-oss-120b atualemnte Agosto de 26
         try:
             mensagens = _construir_historico_groq(historico_mensagens, prompt_sistema)
             response_groq = client_groq.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model= "openai/gpt-oss-120b",
                 temperature=0.2,
                 response_format={"type": "json_object"},
                 messages=mensagens
             )
             dados = json.loads(response_groq.choices[0].message.content)
-            dados["_modelo_usado"] = "Llama 3.1 8B via Groq (fallback)"
+            dados["_modelo_usado"] = "openai/gpt-oss-120b atualemnte Agosto de 26"
             return dados
 
         except Exception as err_groq:
