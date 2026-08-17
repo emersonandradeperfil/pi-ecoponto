@@ -1,70 +1,278 @@
+import os
+import re
+
 import streamlit as st
-import mysql.connector
+from pymongo import MongoClient
+from dotenv import load_dotenv
 
-from config.ambiente import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
+# Carrega as variáveis do arquivo .env para o ambiente do processo.
+# Precisa vir ANTES de qualquer os.getenv("MONGO_URI").
+load_dotenv()
+
 
 # ============================================================
-#  [BANCO DE DADOS] FUNÇÕES DE CONSULTA SQL (MARIADB AWS)
+# [BANCO DE DADOS] CONEXÃO COM MONGODB ATLAS
 # ============================================================
 
 
-def executar_query(query, params=None):
+@st.cache_resource
+def obter_cliente_mongodb():
+    """
+    Cria e mantém uma conexão reutilizável com o MongoDB Atlas.
+    O @st.cache_resource evita abrir uma nova conexão a cada
+    interação do usuário no Streamlit.
+    """
+
+    # Primeiro tenta pegar dos Secrets do Streamlit
     try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME,
-            connect_timeout=5
-        )
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, params or ())
-        resultados = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return resultados
-    except Exception as err:
-        st.error(f"Erro ao conectar com o banco de dados na AWS: {err}")
-        return []
+        MONGO_URI = st.secrets["MONGO_URI"]
+    except Exception:
+        # Fallback para variável de ambiente
+        MONGO_URI = os.getenv("MONGO_URI")
 
+    if not MONGO_URI:
+        raise ValueError(
+            "MONGO_URI não foi configurada. "
+            "Configure a variável MONGO_URI nos Secrets do Streamlit "
+            "ou no ambiente local."
+        )
+
+    cliente = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=5000
+    )
+
+    # Testa a conexão
+    cliente.admin.command("ping")
+
+    return cliente
+
+
+def obter_colecao():
+    """
+    Retorna a coleção de ecopontos.
+    """
+
+    cliente = obter_cliente_mongodb()
+
+    banco = cliente["pi_ecoponto"]
+
+    colecao = banco["ecopontos"]
+
+    return colecao
+
+
+# ============================================================
+# [UTILITÁRIO] CONVERTE DOCUMENTO MONGODB PARA DICIONÁRIO
+# ============================================================
+
+def limpar_documento(documento):
+    """
+    Remove o campo _id do MongoDB para que os dados retornados
+    tenham o mesmo formato que o código antigo esperava.
+    """
+
+    if documento:
+        documento.pop("_id", None)
+
+    return documento
+
+
+# ============================================================
+# [CONSULTAS] BAIRROS
+# ============================================================
 
 @st.cache_data(ttl=600)
 def carregar_bairros_do_banco():
-    query = "SELECT DISTINCT bairro FROM vw_materiais_por_ecoponto WHERE bairro IS NOT NULL ORDER BY bairro;"
-    dados = executar_query(query)
-    return [linha['bairro'] for linha in dados]
 
+    try:
+        colecao = obter_colecao()
+
+        bairros = colecao.distinct(
+            "bairro",
+            {
+                "ativo": True
+            }
+        )
+
+        bairros = [
+            bairro
+            for bairro in bairros
+            if bairro
+        ]
+
+        return sorted(bairros)
+
+    except Exception as err:
+        st.error(
+            f"Erro ao consultar os bairros no MongoDB Atlas: {err}"
+        )
+
+        return []
+
+
+# ============================================================
+# [CONSULTAS] UNIDADES
+# ============================================================
 
 @st.cache_data(ttl=600)
 def carregar_unidades_do_banco():
-    query = "SELECT DISTINCT ecoponto FROM vw_materiais_por_ecoponto ORDER BY ecoponto;"
-    dados = executar_query(query)
-    return [linha['ecoponto'] for linha in dados]
 
+    try:
+        colecao = obter_colecao()
+
+        unidades = colecao.distinct(
+            "ecoponto",
+            {
+                "ativo": True
+            }
+        )
+
+        unidades = [
+            unidade
+            for unidade in unidades
+            if unidade
+        ]
+
+        return sorted(unidades)
+
+    except Exception as err:
+        st.error(
+            f"Erro ao consultar as unidades no MongoDB Atlas: {err}"
+        )
+
+        return []
+
+
+# ============================================================
+# [CONSULTA] BUSCA POR UNIDADE
+# ============================================================
 
 def buscar_por_unidade_direta(nome_unidade):
-    query = """
-        SELECT ecoponto, endereco, horario, zona, bairro, materiais_aceitos
-        FROM vw_materiais_por_ecoponto
-        WHERE ecoponto = %s
-    """
-    return executar_query(query, (nome_unidade,))
 
+    try:
+        colecao = obter_colecao()
+
+        resultados = colecao.find(
+            {
+                "ecoponto": nome_unidade,
+                "ativo": True
+            },
+            {
+                "_id": 0,
+                "ecoponto": 1,
+                "endereco": 1,
+                "horario": 1,
+                "zona": 1,
+                "bairro": 1,
+                "materiais_aceitos": 1
+            }
+        )
+
+        return list(resultados)
+
+    except Exception as err:
+        st.error(
+            f"Erro ao buscar a unidade no MongoDB Atlas: {err}"
+        )
+
+        return []
+
+
+# ============================================================
+# [CONSULTA] BUSCA POR ZONA
+# ============================================================
 
 def buscar_ecopontos_por_zona(zona_filtro):
-    query = """
-        SELECT ecoponto, endereco, horario, zona, bairro, materiais_aceitos
-        FROM vw_materiais_por_ecoponto
-        WHERE zona = %s
-    """
-    return executar_query(query, (zona_filtro,))
 
+    try:
+        colecao = obter_colecao()
+
+        resultados = colecao.find(
+            {
+                "zona": zona_filtro,
+                "ativo": True
+            },
+            {
+                "_id": 0,
+                "ecoponto": 1,
+                "endereco": 1,
+                "horario": 1,
+                "zona": 1,
+                "bairro": 1,
+                "materiais_aceitos": 1
+            }
+        ).sort(
+            "ecoponto",
+            1
+        )
+
+        return list(resultados)
+
+    except Exception as err:
+        st.error(
+            f"Erro ao buscar os ecopontos por região: {err}"
+        )
+
+        return []
+
+
+# ============================================================
+# [CONSULTA] BUSCA POR TEXTO LIVRE
+# ============================================================
 
 def buscar_por_texto_livre(termo_busca):
-    """Usado pelo chat: busca por nome do ecoponto OU bairro (LIKE '%termo%')."""
-    query = """
-        SELECT ecoponto, endereco, horario, zona, bairro, materiais_aceitos
-        FROM vw_materiais_por_ecoponto
-        WHERE ecoponto LIKE %s OR bairro LIKE %s
     """
-    return executar_query(query, (termo_busca, termo_busca))
+    Usado pelo chatbot.
+
+    Busca pelo nome do ecoponto OU pelo bairro,
+    mantendo o mesmo comportamento do banco antigo.
+    """
+
+    try:
+        colecao = obter_colecao()
+
+        # Evita que caracteres especiais do usuário
+        # sejam interpretados de forma indesejada pelo regex.
+        termo_seguro = re.escape(termo_busca)
+
+        resultados = colecao.find(
+            {
+                "ativo": True,
+                "$or": [
+                    {
+                        "ecoponto": {
+                            "$regex": termo_seguro,
+                            "$options": "i"
+                        }
+                    },
+                    {
+                        "bairro": {
+                            "$regex": termo_seguro,
+                            "$options": "i"
+                        }
+                    }
+                ]
+            },
+            {
+                "_id": 0,
+                "ecoponto": 1,
+                "endereco": 1,
+                "horario": 1,
+                "zona": 1,
+                "bairro": 1,
+                "materiais_aceitos": 1
+            }
+        ).sort(
+            "ecoponto",
+            1
+        )
+
+        return list(resultados)
+
+    except Exception as err:
+        st.error(
+            f"Erro na busca por texto no MongoDB Atlas: {err}"
+        )
+
+        return []

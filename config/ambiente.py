@@ -22,10 +22,11 @@ def get_secret(key):
 try:
     GEMINI_API_KEY = get_secret("GEMINI_API_KEY")
     GROQ_API_KEY = get_secret("GROQ_API_KEY")
-    DB_HOST = get_secret("DB_HOST")
-    DB_USER = get_secret("DB_USER")
-    DB_PASSWORD = get_secret("DB_PASSWORD")
-    DB_NAME = get_secret("DB_NAME")
+    # DB_HOST = get_secret("DB_HOST")
+    # DB_USER = get_secret("DB_USER")
+    # DB_PASSWORD = get_secret("DB_PASSWORD")
+    # DB_NAME = get_secret("DB_NAME")
+    MONGO_URI = get_secret("MONGO_URI")
 except KeyError as e:
     st.error(f"Erro de configuração: A chave {e} não foi encontrada.")
     st.stop()

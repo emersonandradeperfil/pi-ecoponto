@@ -160,7 +160,7 @@ if botao_enviar and prompt_usuario:
                     if pronto_para_buscar:
                         # ── Tem bairro (com ou sem zona) → busca sempre em nome + bairro ──
                         if bairro_detectado:
-                            ecopontos = buscar_por_texto_livre(f"%{bairro_detectado}%")
+                            ecopontos = buscar_por_texto_livre(bairro_detectado)
                             label_local = bairro_detectado
                         # ── Só zona, sem bairro → traz todos da região ──
                         elif zona_detectada:
@@ -199,7 +199,16 @@ if botao_enviar and prompt_usuario:
                                     f'<div style="display:flex;align-items:center;justify-content:center;gap:8px;background-color:#e6e6e6;border:2px solid #2db5e0;border-radius:10px;padding:8px 12px;font-weight:bold;font-size:14px;color: black;cursor:pointer;">'
                                     f'<img src="https://logo-teka.com/wp-content/uploads/2026/01/waze-icon-logo.svg" width="18px" height="18px"/> Waze'
                                     f'</div></a></div>'
-                                )                                      
+                                )
+
+                            # ── Zera os slots: a busca já foi concluída, então a próxima
+                            # pergunta do usuário deve ser tratada como uma consulta nova,
+                            # sem herdar material/bairro/zona da busca anterior. ──
+                            st.session_state.dados_coletados = {
+                                "material": None,
+                                "bairro": None,
+                                "zona": None
+                            }
 
                         elif label_local:
                             resposta_final += (
