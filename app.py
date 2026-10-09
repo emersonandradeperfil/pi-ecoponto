@@ -78,7 +78,7 @@ with col2:
 with col3:
   with st.container(border=True):
     st.markdown("### 🔍 Região")
-    st.write("Veja os ecopontos disponíveis em uma região.")
+    st.write("Ecopontos disponíveis em uma região.")
     st.page_link("pages/3_🔍_Regiao.py", label="Ir", use_container_width=True)
 
 with col4:
