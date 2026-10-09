@@ -135,7 +135,7 @@ if unidade_selecionada != "Selecione...":
                 st.markdown(
                     f'<a href="{link_maps}" target="_blank" style="text-decoration: none; color: black;">'
                     f'<div style="display: flex; align-items: center; justify-content: center; '
-                    f'background-color: #e6e6e6; border: 2px solid red; border-radius: 8px; '
+                    f'background-color: white; border: 2px solid red; border-radius: 8px; '
                     f'padding: 8px 16px; font-weight: bold; cursor: pointer;">'
                     f'<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/500px-Google_Maps_icon_%282020%29.svg.png?_=20200218211225" width="20" height="20" style="margin-right:8px;"/>'
                     f'Maps'
@@ -150,7 +150,7 @@ if unidade_selecionada != "Selecione...":
                 st.markdown(
                     f'<a href="{link_waze}" target="_blank" style="text-decoration: none; color: black;">'
                     f'<div style="display: flex; align-items: center; justify-content: center; '
-                    f'background-color: #e6e6e6; border: 2px solid #2db5e0; border-radius: 10px; '
+                    f'background-color: white; border: 2px solid #2db5e0; border-radius: 10px; '
                     f'padding: 8px 16px; font-weight: bold; cursor: pointer;">'
                     f'<img src="https://logo-teka.com/wp-content/uploads/2026/01/waze-icon-logo.svg" width="20" height="20" style="margin-right:8px;"/>'
                     f'Waze'

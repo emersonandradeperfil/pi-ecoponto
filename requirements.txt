@@ -4,3 +4,6 @@ google-genai
 mysql-connector-python
 python-dotenv
 pymongo
+
+# pip install -r requirements.txt
+# streamlit run app.py
