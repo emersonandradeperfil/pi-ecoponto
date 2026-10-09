@@ -1,0 +1,10 @@
+
+// Instalar bibliotecas necessárias
+# pip install -r requirements.txt
+
+// Rodar sistema local
+# streamlit run app.py
+
+// Verificar necessidades de novas bibliotecas
+# pip install pipreqs
+# pipreqs . --encoding=utf-8 --force
