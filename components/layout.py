@@ -68,7 +68,7 @@ def renderizar_rodape():
             <b>PI | TIA | Senac Lapa Tito</b>
         </p>
         <p style="margin: 5px 0 0 0; font-size: 13px; color: #828794;">
-            <b>Integrantes:</b> Emerson, Lucas, Paola, Luiz e Wesley
+            <b>Integrantes:</b> Emerson, Beto, Paola, Wesley
         </p>
     </div>
     """
