@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 from components.layout import (
     renderizar_chat_flutuante,
     renderizar_rodape,
@@ -105,5 +106,5 @@ with col4:
 # COMPONENTES GLOBAIS
 # ============================================================
 
-# renderizar_chat_flutuante()
+renderizar_chat_flutuante()
 renderizar_rodape()

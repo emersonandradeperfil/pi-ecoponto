@@ -91,5 +91,5 @@ except Exception as e:
 # ============================================================
 # 3. COMPONENTES GLOBAIS DE INTERFACE
 # ============================================================
-# renderizar_chat_flutuante()
+renderizar_chat_flutuante()
 renderizar_rodape()

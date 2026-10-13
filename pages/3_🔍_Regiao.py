@@ -132,5 +132,5 @@ if zona_selecionada != "Selecione...":
 # COMPONENTES GLOBAIS
 # ============================================================
 
-# renderizar_chat_flutuante()
+renderizar_chat_flutuante()
 renderizar_rodape()
