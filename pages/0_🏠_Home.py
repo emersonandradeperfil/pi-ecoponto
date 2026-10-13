@@ -2,9 +2,11 @@ import streamlit as st
 
 from components.layout import (
     renderizar_chat_flutuante,
-    renderizar_estilos_globais,
     renderizar_rodape,
 )
+
+from database.conexao import carregar_dados_analise
+from components.graficos import renderizar_grafico_pizza_abertos
 
 # ============================================================
 #  [INTERFACE] PÁGINA INICIAL (HOME)
@@ -43,14 +45,31 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("♻ Limpeza Urbana SP")
-st.write(
-    "*Seu portal inteligente de limpeza urbana em* **São Paulo**."
-)
+try:
+    df_chamados = carregar_dados_analise()
+    total_geral = len(df_chamados)
+
+    # Função auxiliar para contagens filtradas por texto
+    def contar_status(series, termo):
+        return series.str.contains(termo, case=False, na=False).sum()
+
+except Exception as e:
+    st.error(f"Erro ao carregar ou processar os dados para o painel de análises: {e}")
+
+
+colu1, colu2 = st.columns(2)
+
+with colu1:
+
+    st.title("♻ Limpeza Urbana SP")
+    st.write(
+        "*Seu portal inteligente de limpeza urbana em* **São Paulo**."
+        )
+with colu2:
+
+    renderizar_grafico_pizza_abertos(df_chamados)
 
 st.divider()
-
-
 
 # ============================================================
 # CARDS CLICÁVEIS DE NAVEGAÇÃO
