@@ -46,6 +46,8 @@ try:
     # ------------------------------------------------------------
     # SEÇÃO 1: TABELA DE RESUMO POR STATUS
     # ------------------------------------------------------------
+    st.markdown(f"### {total_geral:,} Chamados".replace(",", "."))
+    st.write("2º trimestre de 2026")
     renderizar_tabela_status(df_chamados, total_geral)
 
     st.divider()

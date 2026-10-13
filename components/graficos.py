@@ -241,9 +241,6 @@ def renderizar_tabela_empresa(df_chamados, total_geral):
 
 def renderizar_tabela_status(df_chamados, total_geral):
 
-    st.markdown(f"### {total_geral:,} Chamados".replace(",", "."))
-    st.write("2º trimestre de 2026")
-    
     df_status = (
         df_chamados.groupby("Status_Normalizado")
         .agg(
