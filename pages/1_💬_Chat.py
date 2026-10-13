@@ -223,5 +223,5 @@ if botao_enviar and prompt_usuario:
                 except Exception as error_ia:
                     st.error(f"Erro no processamento da Inteligência Artificial: {error_ia}")
 
-renderizar_chat_flutuante()
+# renderizar_chat_flutuante()
 renderizar_rodape()

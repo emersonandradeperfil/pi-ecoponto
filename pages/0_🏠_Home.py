@@ -105,5 +105,5 @@ with col4:
 # COMPONENTES GLOBAIS
 # ============================================================
 
-renderizar_chat_flutuante()
+# renderizar_chat_flutuante()
 renderizar_rodape()
