@@ -22,7 +22,6 @@ def renderizar_estilos_globais():
         </style>
     """, unsafe_allow_html=True)
 
-
 def renderizar_chat_flutuante():
     """Botão + iframe flutuante do EcoChat (canto inferior direito)."""
     # URL_DO_CHAT = "https://pi-ecoponto.streamlit.app/?embed=true"
@@ -58,7 +57,6 @@ def renderizar_chat_flutuante():
     """
     st.components.v1.html(codigo_html_chat, height=0)
 
-
 def renderizar_rodape():
     """Rodapé institucional com os créditos do projeto."""
     st.markdown("---")
@@ -73,3 +71,17 @@ def renderizar_rodape():
     </div>
     """
     st.markdown(texto_rodape, unsafe_allow_html=True)
+
+def baixar_csv(df_chamados):
+    colunas_lgpd = ["Órgão", "Logradouro", "Número", "CEP"] # Ajuste os nomes exatos conforme estão no seu DataFrame
+    df_export = df_chamados.drop(columns=colunas_lgpd, errors="ignore")
+    csv_bytes = df_export.to_csv(index=False).encode('utf-8')
+
+# Cria o botão de download nativo do Streamlit
+    st.download_button(
+        label="CSV",
+        data=csv_bytes,
+        file_name="chamados_156_2026.csv",
+        mime="text/csv",
+        help="Clique para baixar a base de dados tratada diretamente para o seu computador"
+    )

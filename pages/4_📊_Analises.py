@@ -6,6 +6,7 @@ from components.layout import (
     renderizar_chat_flutuante,
     renderizar_estilos_globais,
     renderizar_rodape,
+    baixar_csv
 )
 
 # from database.conexao import carregar_dados_analise
@@ -91,20 +92,11 @@ try:
 except Exception as e:
     st.error(f"Erro ao carregar ou processar os dados para o painel de análises: {e}")
 
+baixar_csv(df_chamados)
+
 # ============================================================
 # 3. COMPONENTES GLOBAIS DE INTERFACE
 # ============================================================
-
-csv_bytes = df_chamados.to_csv(index=False).encode('utf-8')
-
-# Cria o botão de download nativo do Streamlit
-st.download_button(
-    label="CSV",
-    data=csv_bytes,
-    file_name="chamados_156_2026.csv",
-    mime="text/csv",
-    help="Clique para baixar a base de dados tratada diretamente para o seu computador"
-)
 
 renderizar_chat_flutuante()
 renderizar_rodape()
