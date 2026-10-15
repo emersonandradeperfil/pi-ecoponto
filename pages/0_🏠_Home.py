@@ -7,7 +7,7 @@ from components.layout import (
 )
 
 from database.baseapi import carregar_dados_analise
-from .components.graficos import renderizar_barra_abertos_regiao
+from components.graficos import renderizar_barra_abertos_regiao
 
 # ============================================================
 #  [INTERFACE] PÁGINA INICIAL (HOME)
