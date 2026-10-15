@@ -115,7 +115,6 @@ def carregar_dados_analise():
 # ============================================================
 # FUNÇÃO DE CARREGAMENTO DOS DADOS (usando csv local e tratando)
 # ============================================================
-
 # @st.cache_data
 # def carregar_dados_analise():
     # """

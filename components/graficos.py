@@ -1,5 +1,5 @@
 import plotly.express as px
-import plotly.graph_objects as go
+# import plotly.graph_objects as go
 import pandas as pd
 import streamlit as st
 
@@ -107,8 +107,6 @@ def renderizar_matriz_regiao_status(df_chamados):
 
 def renderizar_barra_abertos_regiao(df_chamados):
   """Renderiza um gráfico de rosca com os chamados abertos agrupados por região."""
-  
-
   if df_chamados.empty:
     st.warning("Nenhum dado disponível.")
     return
@@ -168,8 +166,6 @@ def renderizar_barra_abertos_regiao(df_chamados):
       
   )
 
-  
-
   # 4. Exibe no Streamlit
   st.plotly_chart(fig, use_container_width=True)
 
@@ -177,7 +173,7 @@ def renderizar_barra_abertos_regiao(df_chamados):
     f'<p style="text-align: center;"><b>{total_geral} chamados em aberto do 156</b></p>', 
     unsafe_allow_html=True
   )
-
+  
 def renderizar_pizza_finalizados_regiao(df_chamados):
   """Renderiza um gráfico de rosca com os chamados abertos agrupados por região."""
   # st.markdown("### Chamados Abertos por Região")

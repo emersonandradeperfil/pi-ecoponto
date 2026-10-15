@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+# import pandas as pd
 
 from components.layout import (
     renderizar_chat_flutuante,
