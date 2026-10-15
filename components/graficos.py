@@ -138,10 +138,6 @@ def renderizar_barra_abertos_regiao(df_chamados):
   total_bruto = df_grouped["Quantidade"].sum()
   total_geral = f"{total_bruto:,.0f}".replace(",", ".")
 
-  st.markdown(
-    f'<p style="text-align: center;"><b>{total_geral} chamados em aberto do 156</b></p>', 
-    unsafe_allow_html=True
-)
 #   # 3. Cria o gráfico de barra com Plotly Express
 
   fig = px.bar(
@@ -156,7 +152,7 @@ def renderizar_barra_abertos_regiao(df_chamados):
 # Ajustes finos de layout para o gráfico de barras em 180x180px
   fig.update_layout(
       width=150,
-      height=180,
+      height=300,
       margin=dict(t=30, b=25, l=10, r=10),  # b=25 garante espaço para os nomes das regiões embaixo
       showlegend=False,
       separators=",.",
@@ -172,8 +168,15 @@ def renderizar_barra_abertos_regiao(df_chamados):
       
   )
 
+  
+
   # 4. Exibe no Streamlit
   st.plotly_chart(fig, use_container_width=True)
+
+  st.markdown(
+    f'<p style="text-align: center;"><b>{total_geral} chamados em aberto do 156</b></p>', 
+    unsafe_allow_html=True
+  )
 
 def renderizar_pizza_finalizados_regiao(df_chamados):
   """Renderiza um gráfico de rosca com os chamados abertos agrupados por região."""

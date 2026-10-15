@@ -63,21 +63,28 @@ colu1, colu2 = st.columns(2)
 st.markdown(
     """
     <style>
-    /* Alinha verticalmente ao centro o conteúdo dentro da primeira coluna */
-    [data-testid="column"]:nth-of-type(1) {
+    /* Alinha verticalmente ao centro o conteúdo de TODAS as colunas */
+    [data-testid="column"] {
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
+    
+    h1, h2, p {text-align: center;}
+
+    /* Aumenta o tamanho da fonte dos títulos (h1) */
+    h1 {font-size: 150px !important; }
+    h2 {font-size: 40px !important;}
     </style>
     """,
     unsafe_allow_html=True
 )
 
 with colu1:
-    st.title("♻️ Limpeza Urbana")
+    st.title("♻️")
+    st.header("Limpeza Urbana SP")
     st.write(
-        "*Seu portal inteligente de limpeza urbana em* **São Paulo**."
+        "*Seu portal inteligente de limpeza urbana*"
     )
 
 with colu2:
