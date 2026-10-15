@@ -70,7 +70,7 @@ st.markdown(
         justify-content: center;
     }
     
-    h1, h2, p {text-align: center;}
+    h1, h2, h3, p {text-align: center;}
 
     /* Aumenta o tamanho da fonte dos títulos (h1) */
     h1 {font-size: 150px !important; }
@@ -100,25 +100,25 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
   with st.container(border=True):
-    st.markdown("### 💬 Chat")
+    st.subheader("### 💬 Chat")
     st.write("Assistente de IA")
     st.page_link("pages/1_💬_Chat.py", label="Ir", use_container_width=True)
 
 with col2:
   with st.container(border=True):
-    st.markdown("### 🏢 Unidade")
+    st.subheader("### 🏢 Unidade")
     st.write("Unidades do Ecoponto")
     st.page_link("pages/2_🏢_Unidade.py", label="Ir", use_container_width=True)
 
 with col3:
   with st.container(border=True):
-    st.markdown("### 🔍 Região")
+    st.subheader("### 🔍 Região")
     st.write("Ecopontos por região")
     st.page_link("pages/3_🔍_Regiao.py", label="Ir", use_container_width=True)
 
 with col4:
   with st.container(border=True):
-    st.markdown("### 📊 Análises")
+    st.subheader("### 📊 Análises")
     st.write("Chamados do 156 - SP")
     st.page_link("pages/4_📊_Analises.py", label="Ir", use_container_width=True)
 
