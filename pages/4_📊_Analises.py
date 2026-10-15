@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 
@@ -6,7 +5,8 @@ from components.layout import (
     renderizar_chat_flutuante,
     renderizar_estilos_globais,
     renderizar_rodape,
-    baixar_csv
+    baixar_csv,
+    perido,
 )
 
 # from database.conexao import carregar_dados_analise
@@ -40,10 +40,9 @@ st.set_page_config(
 
 renderizar_estilos_globais()
 
-st.title("📊 Análises e Indicadores (SP 156)")
+st.title("📊 Análises e Indicadores")
 st.write(
-    "Acompanhe o desempenho, volume de chamados e métricas operacionais "
-    "das empresas e subprefeituras da cidade de São Paulo."
+    "Análise e métricas operacionais dos chamados do 156 nas subprefeituras e empresas da cidade de São Paulo."
 )
 
 # ============================================================
@@ -52,24 +51,14 @@ st.write(
 try:
     df_chamados = carregar_dados_analise()
     total_geral = len(df_chamados)
-    # de_para_regiao = regiaodistrito()
     
-
     # ------------------------------------------------------------
     # SEÇÃO 1: CABEÇALHO
     # ------------------------------------------------------------
-    st.markdown(f"### Chamados: {total_geral:,} ".replace(",", "."))
-
-    # Pega a menor data real e a maior data (filtrando para não pegar os chamados agendados no futuro)
-    if "Data de Abertura" in df_chamados.columns:
-        s = df_chamados.loc[
-            df_chamados["Data de Abertura"] <= pd.Timestamp.today(), "Data de Abertura"
-        ]
-    if not s.empty:
-        st.write(f"Período: De {s.min():%d/%m/%Y} até {s.max():%d/%m/%Y}")
+    st.markdown(f"### {total_geral:,} chamados ".replace(",", "."))
+    perido(df_chamados)
 
     st.divider()
-
     # ------------------------------------------------------------
     # SEÇÃO 2: TABELA DE RESUMO POR STATUS
     # ------------------------------------------------------------

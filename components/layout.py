@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # ============================================================
 #  [INTERFACE] ELEMENTOS VISUAIS COMPARTILHADOS ENTRE PÁGINAS
@@ -85,3 +86,24 @@ def baixar_csv(df_chamados):
         mime="text/csv",
         help="Clique para baixar a base de dados tratada diretamente para o seu computador"
     )
+
+def perido(df_chamados):
+    # Dicionário para traduzir os meses para o português
+    meses_pt = {
+        1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
+        7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez"
+    }
+
+    if "Data de Abertura" in df_chamados.columns:
+        s = df_chamados.loc[
+            df_chamados["Data de Abertura"] <= pd.Timestamp.today(), 
+            "Data de Abertura"
+        ]
+        
+        if not s.empty:
+            # Obtém o mínimo e o máximo da série já filtrada
+            min_data = s.min()
+            max_data = s.max()
+            
+            # Exibe na tela formatado bonitinho com os meses em PT
+            st.write(f"{meses_pt[min_data.month]}/{min_data.year} até {meses_pt[max_data.month]}/{max_data.year}")

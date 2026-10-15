@@ -155,7 +155,7 @@ def renderizar_barra_abertos_regiao(df_chamados):
 
 # Ajustes finos de layout para o gráfico de barras em 180x180px
   fig.update_layout(
-      width=180,
+      width=150,
       height=180,
       margin=dict(t=30, b=25, l=10, r=10),  # b=25 garante espaço para os nomes das regiões embaixo
       showlegend=False,
@@ -168,7 +168,8 @@ def renderizar_barra_abertos_regiao(df_chamados):
   # Ajusta a posição e o tamanho do texto nas barras
   fig.update_traces(
       textposition="inside",
-      textfont=dict(size=9)
+      textfont=dict(weight="bold", size=16),
+      
   )
 
   # 4. Exibe no Streamlit

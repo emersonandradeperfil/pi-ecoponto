@@ -60,14 +60,27 @@ except Exception as e:
 
 colu1, colu2 = st.columns(2)
 
-with colu1:
+st.markdown(
+    """
+    <style>
+    /* Alinha verticalmente ao centro o conteúdo dentro da primeira coluna */
+    [data-testid="column"]:nth-of-type(1) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-    st.title("♻ Limpeza Urbana SP")
+with colu1:
+    st.title("♻️ Limpeza Urbana")
     st.write(
         "*Seu portal inteligente de limpeza urbana em* **São Paulo**."
-        )
-with colu2:
+    )
 
+with colu2:
     renderizar_barra_abertos_regiao(df_chamados)
 
 st.divider()
