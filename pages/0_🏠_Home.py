@@ -6,8 +6,8 @@ from components.layout import (
     renderizar_rodape,
 )
 
-from database.conexao import carregar_dados_analise
-from components.graficos import renderizar_grafico_pizza_abertos
+from database.baseapi import carregar_dados_analise
+from components.graficos import renderizar_barra_abertos_regiao
 
 # ============================================================
 #  [INTERFACE] PÁGINA INICIAL (HOME)
@@ -68,7 +68,7 @@ with colu1:
         )
 with colu2:
 
-    renderizar_grafico_pizza_abertos(df_chamados)
+    renderizar_barra_abertos_regiao(df_chamados)
 
 st.divider()
 

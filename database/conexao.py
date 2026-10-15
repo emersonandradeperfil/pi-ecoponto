@@ -11,68 +11,68 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ============================================================
-# FUNÇÃO DE CARREGAMENTO DOS DADOS (Movida para o topo)
+# FUNÇÃO DE CARREGAMENTO DOS DADOS (usando csv local)
 # ============================================================
 
-@st.cache_data
-def carregar_dados_analise():
-    """
-    Carrega o arquivo CSV com suporte a encodings diferentes, trata as datas
-    em português e calcula a quantidade de dias de atendimento por chamado.
-    """
-    # 1. Pega o diretório atual onde está o conexao.py (pasta 'database')
-    diretorio_atual = os.path.dirname(__file__) 
+# @st.cache_data
+# def carregar_dados_analise():
+#     """
+#     Carrega o arquivo CSV com suporte a encodings diferentes, trata as datas
+#     em português e calcula a quantidade de dias de atendimento por chamado.
+#     """
+#     # 1. Pega o diretório atual onde está o conexao.py (pasta 'database')
+#     diretorio_atual = os.path.dirname(__file__) 
 
-    # 2. Sobe um nível com '..' para voltar à raiz, depois entra na pasta 'base'
-    caminho_csv = os.path.join(diretorio_atual, "..", "base", "base_pi_1sem26.csv")
+#     # 2. Sobe um nível com '..' para voltar à raiz, depois entra na pasta 'base'
+#     caminho_csv = os.path.join(diretorio_atual, "..", "base", "base_pi_1sem26.csv")
 
-    colunas_base = [
-        "Data_Abertura", "Data_Atendimento", "Canal", "Assunto", "Servico",
-        "Especificacao", "Situacao", "Orgao", "Logradouro", "Numero", "CEP",
-        "Subprefeitura", "Distrito", "Empresa", "Regiao", "Prazo_SLA"
-    ]
+#     colunas_base = [
+#         "Data_Abertura", "Data_Atendimento", "Canal", "Assunto", "Servico",
+#         "Especificacao", "Situacao", "Orgao", "Logradouro", "Numero", "CEP",
+#         "Subprefeitura", "Distrito", "Empresa", "Regiao", "Prazo_SLA"
+#     ]
 
-    try:
-        df = pd.read_csv(
-            caminho_csv,
-            names=colunas_base,
-            header=0,
-            on_bad_lines="skip",
-            encoding="utf-8",
-            engine="python"
-        )
-    except Exception:
-        df = pd.read_csv(
-            caminho_csv,
-            names=colunas_base,
-            header=0,
-            sep=";",
-            on_bad_lines="skip",
-            encoding="latin1",
-            engine="python"
-        )
+#     try:
+#         df = pd.read_csv(
+#             caminho_csv,
+#             names=colunas_base,
+#             header=0,
+#             on_bad_lines="skip",
+#             encoding="utf-8",
+#             engine="python"
+#         )
+#     except Exception:
+#         df = pd.read_csv(
+#             caminho_csv,
+#             names=colunas_base,
+#             header=0,
+#             sep=";",
+#             on_bad_lines="skip",
+#             encoding="latin1",
+#             engine="python"
+#         )
 
-    # Dicionário para conversão dos meses abreviados do português
-    meses_pt = {
-        "jan.": "Jan", "fev.": "Feb", "mar.": "Mar", "abr.": "Apr",
-        "mai.": "May", "jun.": "Jun", "jul.": "Jul", "ago.": "Aug",
-        "set.": "Sep", "out.": "Oct", "nov.": "Nov", "dez.": "Dec"
-    }
+#     # Dicionário para conversão dos meses abreviados do português
+#     meses_pt = {
+#         "jan.": "Jan", "fev.": "Feb", "mar.": "Mar", "abr.": "Apr",
+#         "mai.": "May", "jun.": "Jun", "jul.": "Jul", "ago.": "Aug",
+#         "set.": "Sep", "out.": "Oct", "nov.": "Nov", "dez.": "Dec"
+#     }
 
-    for mes_pt, mes_en in meses_pt.items():
-        df["Data_Abertura"] = df["Data_Abertura"].astype(str).str.replace(mes_pt, mes_en)
-        df["Data_Atendimento"] = df["Data_Atendimento"].astype(str).str.replace(mes_pt, mes_en)
+#     for mes_pt, mes_en in meses_pt.items():
+#         df["Data_Abertura"] = df["Data_Abertura"].astype(str).str.replace(mes_pt, mes_en)
+#         df["Data_Atendimento"] = df["Data_Atendimento"].astype(str).str.replace(mes_pt, mes_en)
 
-    df["dt_abertura"] = pd.to_datetime(df["Data_Abertura"], format="%d/%b/%y", errors="coerce")
-    df["dt_atendimento"] = pd.to_datetime(df["Data_Atendimento"], format="%d/%b/%y", errors="coerce")
+#     df["dt_abertura"] = pd.to_datetime(df["Data_Abertura"], format="%d/%b/%y", errors="coerce")
+#     df["dt_atendimento"] = pd.to_datetime(df["Data_Atendimento"], format="%d/%b/%y", errors="coerce")
 
-    # Dias de atendimento em relação à data atual (se aberto) ou data de encerramento
-    dt_fim = df["dt_atendimento"].fillna(pd.Timestamp.now())
-    df["Dias_Atendimento"] = (dt_fim - df["dt_abertura"]).dt.days
+#     # Dias de atendimento em relação à data atual (se aberto) ou data de encerramento
+#     dt_fim = df["dt_atendimento"].fillna(pd.Timestamp.now())
+#     df["Dias_Atendimento"] = (dt_fim - df["dt_abertura"]).dt.days
 
-    df["Status_Normalizado"] = df["Situacao"].astype(str).str.strip()
+#     df["Status_Normalizado"] = df["Situacao"].astype(str).str.strip()
 
-    return df
+#     return df
 
 # ============================================================
 # [BANCO DE DADOS] CONEXÃO COM MONGODB ATLAS

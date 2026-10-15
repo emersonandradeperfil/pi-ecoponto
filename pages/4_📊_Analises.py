@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 from components.layout import (
     renderizar_chat_flutuante,
@@ -6,16 +7,25 @@ from components.layout import (
     renderizar_rodape,
 )
 
-from database.conexao import carregar_dados_analise
+# from database.conexao import carregar_dados_analise
 
+from database.baseapi import carregar_dados_analise
+# from database.regiao import regiaodistrito
 from components.graficos import (
-    renderizar_grafico_rosca_abertos,
-    renderizar_grafico_rosca_finalizados,
-    renderizar_tabela_regiao,
     renderizar_tabela_status,
-    renderizar_tabela_empresa,
-    renderizar_tabela_distrito
+    renderizar_pizza_abertos_regiao,
+    renderizar_pizza_finalizados_regiao
 )
+
+# from components.graficos import (
+#     renderizar_grafico_rosca_abertos,
+#     renderizar_grafico_rosca_finalizados,
+#     renderizar_tabela_regiao,
+#     renderizar_tabela_status,
+#     renderizar_tabela_empresa,
+#     renderizar_tabela_distrito
+# )
+
 
 # ============================================================
 # 1. CONFIGURAÇÃO DA PÁGINA STREAMLIT
@@ -34,58 +44,48 @@ st.write(
     "das empresas e subprefeituras da cidade de São Paulo."
 )
 
-st.divider()
-
 # ============================================================
 # 2. CARREGAMENTO DOS GRÁFICOS
 # ============================================================
 try:
     df_chamados = carregar_dados_analise()
     total_geral = len(df_chamados)
+    # de_para_regiao = regiaodistrito()
+    
 
     # ------------------------------------------------------------
-    # SEÇÃO 1: TABELA DE RESUMO POR STATUS
+    # SEÇÃO 1: CABEÇALHO
     # ------------------------------------------------------------
-    st.markdown(f"### {total_geral:,} Chamados".replace(",", "."))
-    st.write("2º trimestre de 2026")
+    st.markdown(f"### Chamados: {total_geral:,} ".replace(",", "."))
+
+    # Pega a menor data real e a maior data (filtrando para não pegar os chamados agendados no futuro)
+    if "Data de Abertura" in df_chamados.columns:
+        s = df_chamados.loc[
+            df_chamados["Data de Abertura"] <= pd.Timestamp.today(), "Data de Abertura"
+        ]
+    if not s.empty:
+        st.write(f"Período: De {s.min():%d/%m/%Y} até {s.max():%d/%m/%Y}")
+
+    st.divider()
+
+    # ------------------------------------------------------------
+    # SEÇÃO 2: TABELA DE RESUMO POR STATUS
+    # ------------------------------------------------------------
+
     renderizar_tabela_status(df_chamados, total_geral)
-
-    st.divider()
-
-    # ------------------------------------------------------------
-    # SEÇÃO 2: GRÁFICOS DE ROSCA (VIA COMPONENTE MODULAR)
-    # ------------------------------------------------------------
-    col_graf1, col_graf2 = st.columns(2)
-    
-    with col_graf1:
-        renderizar_grafico_rosca_abertos(df_chamados)
-    
-    with col_graf2:
-        renderizar_grafico_rosca_finalizados(df_chamados)
     
     st.divider()
 
     # ------------------------------------------------------------
-    # SEÇÃO 3: MATRIZ POR REGIÃO
+    # SEÇÃO 3: TABELA DE ABERTO POR REGIÃO
     # ------------------------------------------------------------
-    st.markdown("### Resumo por Região")
-    renderizar_tabela_regiao(df_chamados)
 
-    st.divider()
+    colu1, colu2 = st.columns(2)
 
-    # ------------------------------------------------------------
-    # SEÇÃO 4: RESUMO POR EMPRESA CONTRATADA
-    # ------------------------------------------------------------
-    st.markdown("### Resumo por Empresa")
-    renderizar_tabela_empresa(df_chamados, total_geral)
-
-    st.divider()
-
-    # ------------------------------------------------------------
-    # SEÇÃO 5: CHAMADOS POR DISTRITO
-    # ------------------------------------------------------------
-    st.markdown("### Chamados por Distrito")
-    renderizar_tabela_distrito(df_chamados)
+    with colu1:
+        renderizar_pizza_abertos_regiao(df_chamados)
+    with colu2:
+        renderizar_pizza_finalizados_regiao(df_chamados)
 
 except Exception as e:
     st.error(f"Erro ao carregar ou processar os dados para o painel de análises: {e}")
