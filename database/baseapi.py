@@ -10,7 +10,7 @@ from database.regiao import regiaodistrito
 # FUNÇÃO DE CARREGAMENTO DOS DADOS (usando API 156)
 # ============================================================
 
-@st.cache_data(ttl=1800) # 30 minutos dados salvo no cache
+@st.cache_data(ttl=86400) # 24hr dados salvo no cache
 def carregar_dados_analise():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
