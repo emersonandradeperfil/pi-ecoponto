@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 
@@ -93,5 +94,17 @@ except Exception as e:
 # ============================================================
 # 3. COMPONENTES GLOBAIS DE INTERFACE
 # ============================================================
+
+csv_bytes = df_chamados.to_csv(index=False).encode('utf-8')
+
+# Cria o botão de download nativo do Streamlit
+st.download_button(
+    label="CSV",
+    data=csv_bytes,
+    file_name="chamados_156_2026.csv",
+    mime="text/csv",
+    help="Clique para baixar a base de dados tratada diretamente para o seu computador"
+)
+
 renderizar_chat_flutuante()
 renderizar_rodape()
