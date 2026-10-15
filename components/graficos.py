@@ -107,7 +107,7 @@ def renderizar_matriz_regiao_status(df_chamados):
 
 def renderizar_barra_abertos_regiao(df_chamados):
   """Renderiza um gráfico de rosca com os chamados abertos agrupados por região."""
-  # st.markdown("### Chamados Abertos por Região")
+  
 
   if df_chamados.empty:
     st.warning("Nenhum dado disponível.")
@@ -138,6 +138,10 @@ def renderizar_barra_abertos_regiao(df_chamados):
   total_bruto = df_grouped["Quantidade"].sum()
   total_geral = f"{total_bruto:,.0f}".replace(",", ".")
 
+  st.markdown(
+    f'<p style="text-align: center;"><b>{total_geral} chamados em aberto do 156</b></p>', 
+    unsafe_allow_html=True
+)
 #   # 3. Cria o gráfico de barra com Plotly Express
 
   fig = px.bar(
@@ -156,11 +160,6 @@ def renderizar_barra_abertos_regiao(df_chamados):
       margin=dict(t=30, b=25, l=10, r=10),  # b=25 garante espaço para os nomes das regiões embaixo
       showlegend=False,
       separators=",.",
-      title=dict(
-          text=f"{total_geral} chamados em aberto do 156",
-          x=0.5,            
-          xanchor="center", 
-      ),
       xaxis=dict(
         title=None, showgrid=False),                      # Remove o rótulo padrão do eixo X para economizar espaço
       yaxis=dict(title=None, showticklabels=False, showgrid=False) # Oculta os números do eixo Y (já que usamos o 'text' nas barras)
