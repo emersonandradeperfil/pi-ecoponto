@@ -101,16 +101,16 @@ def carregar_dados_analise():
 # ============================================================
 # @st.cache_data
 # def carregar_dados_analise():
-    # caminho_arquivo = "base/dados_locais.csv"
-    # df = pd.read_csv(caminho_arquivo, encoding="utf-8")
+#     caminho_arquivo = "base/dados_locais.csv"
+#     df = pd.read_csv(caminho_arquivo, encoding="utf-8")
     
-    # # Converte as colunas de data para o formato datetime do Pandas
-    # if "Data de Abertura" in df.columns:
-    #     df["Data de Abertura"] = pd.to_datetime(df["Data de Abertura"], errors="coerce")
-    # if "Data de Finalização" in df.columns:
-    #     df["Data de Finalização"] = pd.to_datetime(df["Data de Finalização"], errors="coerce")
+#     # Converte as colunas de data para o formato datetime do Pandas
+#     if "Data de Abertura" in df.columns:
+#         df["Data de Abertura"] = pd.to_datetime(df["Data de Abertura"], errors="coerce")
+#     if "Data de Finalização" in df.columns:
+#         df["Data de Finalização"] = pd.to_datetime(df["Data de Finalização"], errors="coerce")
         
-    # return df
+#     return df
 
 # ============================================================
 # FUNÇÃO DE CARREGAMENTO DOS DADOS (usando csv local e tratando)

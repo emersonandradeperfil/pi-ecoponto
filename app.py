@@ -6,8 +6,8 @@ st.set_page_config(page_title="Limpeza - SP", page_icon="♻", layout="wide")
 pg = st.navigation([
     st.Page("pages/0_🏠_Home.py", title="Home", icon="🏠"),
     st.Page("pages/1_💬_Chat.py", title="Assistente IA", icon="💬"),
-    st.Page("pages/2_🏢_Unidade.py", title="Unidades", icon="🏢"),
-    st.Page("pages/3_🔍_Regiao.py", title="Regiões", icon="🔍"),
+    st.Page("pages/2_♻_Ecoponto.py", title="Ecoponto", icon="♻"),
+    st.Page("pages/3_🚛_Cata-bagulho.py", title="Cata-bagulho", icon="🚛"),
     st.Page("pages/4_📊_Analises.py", title="Análises SP156", icon="📊"),
 ])
 

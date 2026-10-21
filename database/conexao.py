@@ -144,6 +144,43 @@ def carregar_unidades_do_banco():
 
 
 # ============================================================
+# [CONSULTA] UNIDADES DE UMA REGIÃO
+# ============================================================
+
+@st.cache_data(ttl=600)
+def carregar_unidades_por_zona(zona):
+    """
+    Retorna os nomes dos ecopontos ativos de uma região (zona),
+    em ordem alfabética. Usado no 2º filtro da página de ecopontos.
+    """
+ 
+    try:
+        colecao = obter_colecao()
+ 
+        unidades = colecao.distinct(
+            "ecoponto",
+            {
+                "zona": zona,
+                "ativo": True
+            }
+        )
+ 
+        unidades = [
+            unidade
+            for unidade in unidades
+            if unidade
+        ]
+ 
+        return sorted(unidades)
+ 
+    except Exception as err:
+        st.error(
+            f"Erro ao consultar as unidades da região no MongoDB Atlas: {err}"
+        )
+ 
+        return []
+
+# ============================================================
 # [CONSULTA] BUSCA POR UNIDADE
 # ============================================================
 
