@@ -107,17 +107,17 @@ def renderizar_consulta_regiao():
     if subprefeitura == SEM_SELECAO:
         st.info("Escolha um distrito")
         return
- 
+    
     empresa, url = REGIOES[regiao][subprefeitura]
-    st.caption(f"Operadora responsável por {subprefeitura}: **{empresa}**")
- 
+
     st.divider()
- 
+    st.write(f"Prestadora: {empresa}")
+    
     # o iframe é recarregado automaticamente quando a subprefeitura (e a URL) muda
     components.iframe(url, height=600, scrolling=True)
  
     # alternativa caso o site da empresa bloqueie ser exibido dentro de outro site
-    st.link_button("Abrir em nova aba", url)
+    # st.link_button("Abrir em nova aba", url)
  
  
 renderizar_consulta_regiao()
