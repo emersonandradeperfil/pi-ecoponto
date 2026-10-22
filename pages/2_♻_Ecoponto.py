@@ -88,10 +88,11 @@ def montar_card_html(eco):
 # FILTRO 1 POR REGIÃO OBRIGATÓRIO
 # ============================================================
 
-st.write("🔍 Busca de Ecopontos")
+st.header("♻ Ecoponto")
+st.write("Saiba onde encontrar Ecopontos próximos à sua região e o que descartar.")
  
 zona_selecionada = st.selectbox(
-    "1. Selecione a região",
+    "Selecione uma região",
     ZONAS,
     key="filtro_zona_regiao"
 )
@@ -108,10 +109,10 @@ if regiao_escolhida:
     opcoes_unidade = [opcao_todas] + unidades_da_zona
 else:
     opcao_todas = None
-    opcoes_unidade = ["Selecione uma região primeiro"]
+    opcoes_unidade = ["Selecione..."]
  
 unidade_selecionada = st.selectbox(
-    "2. Selecione a unidade",
+    "Selecione uma unidade",
     opcoes_unidade,
     # a key muda com a região: ao trocar de região, este filtro volta para "Todas"
     key=f"filtro_unidade_{zona_selecionada}",

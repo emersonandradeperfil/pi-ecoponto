@@ -112,9 +112,9 @@ with col2:
 
 with col3:
   with st.container(border=True):
-      st.subheader("🚛 Cata-bagulho")
+      st.subheader("🚛 Cata-Bagulho")
       st.write("Serviço do Cata-Bagulho")
-      st.page_link("pages/3_🚛_Cata-bagulho.py", label="Ir", use_container_width=True)
+      st.page_link("pages/3_🚛_Cata-Bagulho.py", label="Ir", use_container_width=True)
 
 with col4:
   with st.container(border=True):

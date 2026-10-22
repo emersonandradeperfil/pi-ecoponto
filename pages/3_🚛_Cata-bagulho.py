@@ -74,11 +74,12 @@ REGIOES = {
 SEM_SELECAO = "Selecione..."
 
 def renderizar_consulta_regiao():
-    st.header("Consulte sua região")
+    st.header("🚛Cata-Bagulho")
+    st.write("Confira a programação do Cata-Bagulho na sua região.")
  
     # 1º filtro: região (começa em "Selecione...")
     regiao = st.selectbox(
-        "Pesquise e selecione uma região de São Paulo",
+        "Selecione uma região",
         [SEM_SELECAO] + list(REGIOES.keys()),
         key="cb_regiao",
     )
@@ -92,7 +93,7 @@ def renderizar_consulta_regiao():
         opcoes_sub = [SEM_SELECAO]
  
     subprefeitura = st.selectbox(
-        "Subprefeitura",
+        "Selecione um distrito",
         opcoes_sub,
         # a key muda com a região: ao trocar de região, volta para "Selecione..."
         key=f"cb_subprefeitura_{regiao}",
@@ -104,7 +105,7 @@ def renderizar_consulta_regiao():
         return
  
     if subprefeitura == SEM_SELECAO:
-        st.info("Agora escolha a subprefeitura para ver o mapa de atendimento.")
+        st.info("Escolha um distrito")
         return
  
     empresa, url = REGIOES[regiao][subprefeitura]
