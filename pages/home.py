@@ -102,25 +102,25 @@ with col1:
   with st.container(border=True):
     st.subheader("💬 Chat")
     st.write("Assistente de IA")
-    st.page_link("pages/1_💬_Chat.py", label="Ir", use_container_width=True)
+    st.page_link("pages/chat.py", label="Ir", use_container_width=True)
 
 with col2:
   with st.container(border=True):
     st.subheader("♻ Ecoponto")
     st.write("Endereços de Ecopontos")
-    st.page_link("pages/2_♻_Ecoponto.py", label="Ir", use_container_width=True)
+    st.page_link("pages/ecoponto.py", label="Ir", use_container_width=True)
 
 with col3:
   with st.container(border=True):
       st.subheader("🚛 Cata-Bagulho")
       st.write("Serviço do Cata-Bagulho")
-      st.page_link("pages/3_🚛_Cata-Bagulho.py", label="Ir", use_container_width=True)
+      st.page_link("pages/cata_bagulho.py", label="Ir", use_container_width=True)
 
 with col4:
   with st.container(border=True):
       st.subheader("📊 Análises")
       st.write("Chamados do 156 - SP")
-      st.page_link("pages/4_📊_Analises.py", label="Ir", use_container_width=True)
+      st.page_link("pages/analises.py", label="Ir", use_container_width=True)
 
 # ============================================================
 # COMPONENTES GLOBAIS
